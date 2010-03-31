@@ -2,23 +2,9 @@
 #include<stdlib.h>
 #include<arpa/inet.h>
 
-typedef unsigned char  u8int;
-typedef unsigned short u16int;
+#include<jpeg_header.h>
 
-struct Nf_array {
-	u8int id;
-	u8int hv_sampling_factor;
-	u8int quant_table_number;
-};
 
-struct __attribute__ ((__packed__)){
-	u16int length;
-	u8int sample;
-	u16int Y;
-	u16int X;
-	u8int Nf;
-	struct Nf_array nf_array[];
-}__attribute__ ((__packed__));
 
 static void read_start_of_frame(FILE* f) {
 	u16int length = 0;
@@ -66,11 +52,6 @@ static void handle_marker(FILE* f, unsigned char marker) {
 	}
 
 }
-
-#define one_more_byte(c,f,idx) do{\
-		c = fgetc(f);\
-		(idx)++;\
-	}while(0)
 
 
 int main(int argc, char* argv[]){
