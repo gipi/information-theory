@@ -6,18 +6,22 @@
 
 
 
-static void read_start_of_frame(FILE* f) {
-	u16int length = 0;
+static void read_length_and_rewind(u16int* length, FILE* f) {
 	/* first read the length */
-	fread(&length, sizeof(length), 1, f);
+	fread(length, sizeof(*length), 1, f);
 
 	/* data with most significant bit first */
-	length = htons(length);
+	*length = htons(*length);
 
 	/* rewind a little bit */
-	fseek(f, -sizeof(length), SEEK_CUR);
+	fseek(f, -sizeof(*length), SEEK_CUR);
 	if(ferror(f))
 		perror("fseek");
+}
+
+static void read_start_of_frame(FILE* f) {
+	u16int length;
+	read_length_and_rewind(&length, f);
 
 	/* allocate start of frame */
 	struct start_of_frame* sof =
