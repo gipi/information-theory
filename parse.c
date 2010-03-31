@@ -20,38 +20,48 @@ struct __attribute__ ((__packed__)){
 	struct Nf_array nf_array[];
 }__attribute__ ((__packed__));
 
-static void handle_marker(FILE* f, unsigned char marker) {
+static void read_start_of_frame(FILE* f) {
 	u16int length = 0;
+	/* first read the length */
+	fread(&length, sizeof(length), 1, f);
+
+	/* data with most significant bit first */
+	length = htons(length);
+
+	/* rewind a little bit */
+	fseek(f, -sizeof(length), SEEK_CUR);
+	if(ferror(f))
+		perror("fseek");
+
+	/* allocate start of frame */
+	struct start_of_frame* sof =
+		malloc(length);
+
+	/* read all the frame */
+	fread(sof, length, 1, f);
+
+	printf(" length: %u\n", htons(sof->length));
+	printf(" sample: %u\n", sof->sample);
+	printf(" Y: %04x\n", htons(sof->Y));
+	printf(" X: %04x\n", htons(sof->X));
+	printf(" #components: %u\n", sof->Nf);
+
+	unsigned int cycle;
+	printf( " SUBSAMPLING\n");
+	for (cycle = 0 ; cycle < sof->Nf ; cycle++ ) {
+		struct Nf_array nfa = sof->nf_array[cycle];
+		printf( " id: %u\n"
+			" HV sampling %hd:%hd\n\n",
+				nfa.id,
+				nfa.hv_sampling_factor & 15,
+				nfa.hv_sampling_factor >> 4);
+	}
+}
+
+static void handle_marker(FILE* f, unsigned char marker) {
 	switch (marker) {
 		case 0xc0:
-			/* first read the length */
-
-			printf("sizeof u16int: %u\n", sizeof(length));
-			fread(&length, sizeof(length), 1, f);
-			/* data with most significant bit first */
-			length = htons(length);
-			printf(" length: %u\n", length);
-
-			/* rewind a little bit */
-			fprintf(stdout, "before: %ld\n", ftell(f));
-			fseek(f, -sizeof(length), SEEK_CUR);
-			fprintf(stdout, "after: %ld\n", ftell(f));
-			if(ferror(f))
-				perror("fseek");
-
-			struct start_of_frame* sof =
-				malloc(sizeof(struct start_of_frame));
-
-			/* read all the frame */
-			fread(sof, length, 1, f);
-
-			printf(" length: %u\n", htons(sof->length));
-			printf(" sample: %u\n", sof->sample);
-			printf(" Y: %04x\n", htons(sof->Y));
-			printf(" X: %04x\n", htons(sof->X));
-			printf(" #components: %u\n", sof->Nf);
-			//printf(" id: %u\n", start_of_frame.nf_array[0].id);
-
+			read_start_of_frame(f);
 			break;
 	}
 
