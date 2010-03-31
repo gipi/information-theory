@@ -1,4 +1,4 @@
-CPPFLAGS=-Wall -g
+CPPFLAGS=-Wall -Wpacked -Wpadded -g
 
 all: parse
 

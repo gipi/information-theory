@@ -11,14 +11,14 @@ struct Nf_array {
 	u8int quant_table_number;
 };
 
-struct {
+struct __attribute__ ((__packed__)){
 	u16int length;
 	u8int sample;
 	u16int Y;
 	u16int X;
 	u8int Nf;
-	struct Nf_array* nf_array;
-}start_of_frame;
+	struct Nf_array nf_array[];
+}__attribute__ ((__packed__));
 
 static void handle_marker(FILE* f, unsigned char marker) {
 	u16int length = 0;
@@ -38,22 +38,18 @@ static void handle_marker(FILE* f, unsigned char marker) {
 			fprintf(stdout, "after: %ld\n", ftell(f));
 			if(ferror(f))
 				perror("fseek");
-#if 1
+
+			struct start_of_frame* sof =
+				malloc(sizeof(struct start_of_frame));
 
 			/* read all the frame */
-			fread(&start_of_frame, length, 1, f);
-#else
-			fread(&start_of_frame.length, sizeof(length), 1, f);
-			fread(&start_of_frame.sample, sizeof(u8int), 1, f);
-			fread(&start_of_frame.Y, sizeof(u16int), 1, f);
-			fread(&start_of_frame.X, sizeof(u16int), 1, f);
-			fread(&start_of_frame.Nf, sizeof(u8int), 1, f);
-#endif
-			printf(" length: %u\n", htons(start_of_frame.length));
-			printf(" sample: %u\n", start_of_frame.sample);
-			printf(" Y: %04x\n", htons(start_of_frame.Y));
-			printf(" X: %04x\n", htons(start_of_frame.X));
-			printf(" #components: %u\n", start_of_frame.Nf);
+			fread(sof, length, 1, f);
+
+			printf(" length: %u\n", htons(sof->length));
+			printf(" sample: %u\n", sof->sample);
+			printf(" Y: %04x\n", htons(sof->Y));
+			printf(" X: %04x\n", htons(sof->X));
+			printf(" #components: %u\n", sof->Nf);
 			//printf(" id: %u\n", start_of_frame.nf_array[0].id);
 
 			break;
