@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
 	}
 
 	unsigned char c;
-	unsigned int idx = 0, col = 0;
+	unsigned int idx = -1, col = 0;
 
 	/*
 	printf("%c", fgetc(fjpeg));
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]){
 				printf("\n\n");
 
 			one_more_byte(c, fjpeg, idx);
-			printf("0xff%02x at %u", c, idx);
+			printf("0xff%02x at %u", c, idx - 1);
 			col = 0;
 		}else{
 
