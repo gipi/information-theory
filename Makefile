@@ -1,5 +1,10 @@
 CPPFLAGS=-Wall -Wpacked -Wpadded -g
 
-all: parse
+ALL = parse
+
+all: $(ALL)
 
 parse: parse.o
+
+clean:
+	rm -f $(ALL) *.o core
