@@ -19,6 +19,11 @@ struct {
 	struct Nf_array* nf_array;
 }start_of_frame;
 
+#define one_more_byte(c,f,idx) do{\
+		c = fgetc(f);\
+		(idx)++;\
+	}while(0)
+
 
 int main(int argc, char* argv[]){
 	if (argc < 2) {
@@ -44,7 +49,7 @@ int main(int argc, char* argv[]){
 
 	/* it's a binary file so checking for EOF in fgetc() is useless */
 	while (1) {
-		c = fgetc(fjpeg);
+		one_more_byte(c, fjpeg, idx);
 		if (feof(fjpeg))
 			break;
 
@@ -52,7 +57,7 @@ int main(int argc, char* argv[]){
 			if(idx)
 				printf("\n\n");
 
-			c = fgetc(fjpeg);
+			one_more_byte(c, fjpeg, idx);
 			printf("0xff%02x at %u", c, idx);
 			col = 0;
 		}else{
@@ -63,7 +68,6 @@ int main(int argc, char* argv[]){
 			printf(" %02x", c);
 			col++;
 		}
-		idx++;
 	}
 
 	fclose(fjpeg);
