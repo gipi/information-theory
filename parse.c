@@ -4,6 +4,19 @@
 
 #include<jpeg_header.h>
 
+static void read_length_and_rewind(u16int* length, FILE* f) {
+	/* first read the length */
+	fread(length, sizeof(*length), 1, f);
+
+	/* data with most significant bit first */
+	*length = htons(*length);
+
+	/* rewind a little bit */
+	fseek(f, -sizeof(*length), SEEK_CUR);
+	if(ferror(f))
+		perror("fseek");
+}
+
 static void read_JFIF(FILE* f) {
 	printf(" JFIF header\n");
 	u16int length;
@@ -29,19 +42,6 @@ static void read_JFIF(FILE* f) {
 			htons(header->xdensity),
 			htons(header->ydensity),
 			units[header->units]);
-}
-
-static void read_length_and_rewind(u16int* length, FILE* f) {
-	/* first read the length */
-	fread(length, sizeof(*length), 1, f);
-
-	/* data with most significant bit first */
-	*length = htons(*length);
-
-	/* rewind a little bit */
-	fseek(f, -sizeof(*length), SEEK_CUR);
-	if(ferror(f))
-		perror("fseek");
 }
 
 static void read_start_of_frame(FILE* f) {
