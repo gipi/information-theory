@@ -42,7 +42,6 @@ static int create_first_half_zigzag(unsigned int side) {
 	struct point seed = {0, 0};
 
 	printf_seed(seed);
-	printf("\n");
 	zigzag[idx] = seed;
 	idx++;
 
@@ -64,7 +63,6 @@ static int create_first_half_zigzag(unsigned int side) {
 
 			idx++;
 		}
-		printf("\n");
 		who *= -1;
 	}
 
@@ -94,7 +92,6 @@ static void create_second_half_zigzag(unsigned int side, int who) {
 
 			idx++;
 		}
-		printf("\n");
 		who *= -1;
 	}
 }
