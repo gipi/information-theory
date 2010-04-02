@@ -213,13 +213,6 @@ int main(int argc, char* argv[]){
 	unsigned char c;
 	unsigned int idx = -1, col = 0;
 
-	/*
-	printf("%c", fgetc(fjpeg));
-	printf("%c", fgetc(fjpeg));
-	printf("%c", fgetc(fjpeg));
-	printf("%c", fgetc(fjpeg));
-	exit(0);*/
-
 	/* it's a binary file so checking for EOF in fgetc() is useless */
 	while (1) {
 		one_more_byte(c, fjpeg, idx);
