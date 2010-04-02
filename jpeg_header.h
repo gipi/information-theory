@@ -37,4 +37,15 @@ struct start_of_frame{
 	struct Nf_array nf_array[];
 }__attribute__ ((__packed__));
 
+struct quantization {
+	u8int precision:4;
+	u8int index:4;
+	u8int value[64];
+};
+
+struct quantization_table {
+	u16int length;
+	struct quantization quantization[];
+}__attribute__ ((__packed__));
+
 #endif
