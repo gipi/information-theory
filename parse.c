@@ -127,7 +127,7 @@ static void de_zig_zag(u8int values[], unsigned int side) {
 	}
 }
 
-static void read_JFIF(FILE* f) {
+static unsigned int read_JFIF(FILE* f) {
 	printf(" JFIF header\n");
 	u16int length;
 	read_length_and_rewind(&length, f);
@@ -152,9 +152,11 @@ static void read_JFIF(FILE* f) {
 			htons(header->xdensity),
 			htons(header->ydensity),
 			units[header->units]);
+
+	return length;
 }
 
-static void read_start_of_frame(FILE* f) {
+static unsigned int read_start_of_frame(FILE* f) {
 	u16int length;
 	read_length_and_rewind(&length, f);
 
@@ -181,20 +183,25 @@ static void read_start_of_frame(FILE* f) {
 				nfa.hv_sampling_factor & 15,
 				nfa.hv_sampling_factor >> 4);
 	}
+
+	return length;
 }
 
 static void read_quantization_table(FILE* f) {
 }
 
-static void handle_marker(FILE* f, unsigned char marker) {
+static unsigned int handle_marker(FILE* f, unsigned char marker) {
+	unsigned int delta_idx = 0;
 	switch (marker) {
 		case 0xc0:
-			read_start_of_frame(f);
+			delta_idx = read_start_of_frame(f);
 			break;
 		case 0xe0:
-			read_JFIF(f);
+			delta_idx = read_JFIF(f);
 			break;
 	}
+
+	return delta_idx;
 }
 
 
@@ -211,7 +218,7 @@ int main(int argc, char* argv[]){
 	}
 
 	unsigned char c;
-	unsigned int idx = -1, col = 0;
+	unsigned int idx = -1, col = 0, delta = 0;
 
 	/* it's a binary file so checking for EOF in fgetc() is useless */
 	while (1) {
@@ -225,7 +232,7 @@ int main(int argc, char* argv[]){
 
 			one_more_byte(c, fjpeg, idx);
 			printf("0xff%02x at %u", c, idx - 1);
-			handle_marker(fjpeg, c);
+			delta = handle_marker(fjpeg, c);
 			col = 0;
 		}else{
 
