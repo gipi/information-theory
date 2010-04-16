@@ -48,4 +48,12 @@ struct quantization_table {
 	struct quantization quantization[];
 }__attribute__ ((__packed__));
 
+struct huffman_table {
+	u16int length;
+	u8int matrix_type:4;
+	u8int identifier:4;
+	u16int ncodes;
+	u8int value[];
+}__attribute__ ((__packed__));
+
 #endif

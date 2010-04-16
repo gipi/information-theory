@@ -204,11 +204,30 @@ static unsigned int read_quantization_table(FILE* f) {
 	return length;
 }
 
+static unsigned int read_huffman_table(FILE* f) {
+	u16int length;
+	read_length_and_rewind(&length, f);
+
+	struct huffman_table* ht = malloc(length);
+
+	fread(ht, length, 1, f);
+
+	printf(" HUFFMAN TABLE (length: %u)\n", length);
+	printf(" matrix type: %d\n", ht->matrix_type);
+	printf(" identifier: %d\n", ht->identifier);
+	printf(" # codes: %d\n", htons(ht->ncodes));
+
+	return length;
+}
+
 static unsigned int handle_marker(FILE* f, unsigned char marker) {
 	unsigned int delta_idx = 0;
 	switch (marker) {
 		case 0xc0:
 			delta_idx = read_start_of_frame(f);
+			break;
+		case 0xc4:
+			delta_idx = read_huffman_table(f);
 			break;
 		case 0xe0:
 			delta_idx = read_JFIF(f);
