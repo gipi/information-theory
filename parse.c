@@ -241,7 +241,12 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 
-	FILE* fjpeg = fopen(argv[1], "r");
+	FILE* fjpeg;
+	if (!strcmp(argv[1], "-"))
+		fjpeg = stdin;
+	else
+		fjpeg = fopen(argv[1], "r");
+
 	if (!fjpeg) {
 		perror("fatal opening jpeg file");
 		exit(1);
