@@ -47,8 +47,8 @@ static int create_first_half_zigzag(unsigned int side) {
 
 
 	for (diagonale = 2 ; diagonale <= side ; diagonale++) {
-		seed.x = who > 0 ? seed.x+1 : seed.x;
-		seed.y = who < 0 ? seed.y+1 : seed.y;
+		seed.x = who > 0 ? seed.x + 1 : seed.x;
+		seed.y = who < 0 ? seed.y + 1 : seed.y;
 		zigzag[idx] = seed;
 
 		printf_seed(seed);
