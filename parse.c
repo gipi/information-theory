@@ -98,7 +98,7 @@ static void create_second_half_zigzag(unsigned int side, int who) {
 
 static void create_zig_zag(unsigned int side) {
 	free(zigzag);
-	zigzag = malloc(side * side);
+	zigzag = malloc(sizeof(struct point) * side * side);
 	int who = create_first_half_zigzag(side);
 	create_second_half_zigzag(side, who);
 }
