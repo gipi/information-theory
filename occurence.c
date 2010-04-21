@@ -5,6 +5,7 @@
 struct {
 	int minimal:1;
 	int binary:1;
+	int percentual:1;
 	char* fmt;
 	char endline;
 	char between;
@@ -64,6 +65,9 @@ int main(int argc, char* argv[]) {
 				options.endline = '\0';
 				options.between = '\0';
 				break;
+			case 'p':
+				options.percentual = 1;
+				break;
 				
 		}
 	}
@@ -84,13 +88,30 @@ int main(int argc, char* argv[]) {
 	char byte[256];
 
 	unsigned int cycle;
+
+	/* if we want the percentual*/
+	if (options.percentual) {
+		unsigned long long int total = 0;
+		/* first calculate the total */
+		for (cycle = 0 ; cycle < 0xff ; cycle++) {
+			total += occourrence[cycle];
+		}
+
+		fprintf(stderr, "total: %llu\n", total);
+
+		/* second rescale */
+		for (cycle = 0 ; cycle < 0xff ; cycle++) {
+			occourrence[cycle] = (double)occourrence[cycle]/(double)total*100;
+		}
+	}
+
 	for (cycle = 0 ; cycle < 0xff ; cycle++) {
 		if (occourrence[cycle] == 0 && options.minimal)
 			continue;
 		sprintf(byte, options.fmt, cycle);
-		fprintf(stdout, "%s%c%llu%c",
+		fprintf(stdout, "%s%c%llu%s%c",
 			byte, options.between,
-			occourrence[cycle],
+			occourrence[cycle], options.percentual ? "%" : "",
 			options.endline);
 	}
 
