@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 
 	FILE* ff = stdin;
 
-	char c;
+	unsigned char c;
 	while(1){
 		c = fgetc(ff);
 		if (feof(ff))
