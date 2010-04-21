@@ -6,6 +6,8 @@ struct {
 	int minimal:1;
 	int binary:1;
 	char* fmt;
+	char endline;
+	char between;
 	int argc;
 	char* argv[];
 }options;
@@ -31,6 +33,8 @@ int main(int argc, char* argv[]) {
 	options.fmt = strdup("0x%02x");
 	options.argc = 1;
 	options.argv[0] = argv[0];
+	options.endline = '\n';
+	options.between = '\t';
 	
 	int nargs = 0;
 
@@ -56,6 +60,10 @@ int main(int argc, char* argv[]) {
 			case 'f':
 				options.fmt = strdup(argv[++nargs]);
 				break;
+			case 'z':
+				options.endline = '\0';
+				options.between = '\0';
+				break;
 				
 		}
 	}
@@ -80,7 +88,10 @@ int main(int argc, char* argv[]) {
 		if (occourrence[cycle] == 0 && options.minimal)
 			continue;
 		sprintf(byte, options.fmt, cycle);
-		fprintf(stdout, "%s\t%llu\n", byte, occourrence[cycle]);
+		fprintf(stdout, "%s%c%llu%c",
+			byte, options.between,
+			occourrence[cycle],
+			options.endline);
 	}
 
 	return 0;
