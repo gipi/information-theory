@@ -6,6 +6,8 @@ struct {
 	int minimal:1;
 	int binary:1;
 	char* fmt;
+	int argc;
+	char* argv[];
 }options;
 
 #define USAGE_STR \
@@ -27,11 +29,22 @@ void usage(int exit_code) {
 int main(int argc, char* argv[]) {
 
 	options.fmt = strdup("0x%02x");
+	options.argc = 1;
+	options.argv[0] = argv[0];
 	
 	int nargs = 0;
+
+	/* parse options:
+	 *
+	 * arg which are not options are copied
+	 * in options.argc and options.argv
+	 *
+	 */
 	while (++nargs < argc) {
-		if (argv[nargs][0] != '-')
+		if (argv[nargs][0] != '-') {
+			options.argv[++options.argc] = argv[nargs];
 			continue;
+		}
 
 		switch (argv[nargs][1]) {
 			case 'h':
