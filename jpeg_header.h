@@ -52,8 +52,8 @@ struct huffman_table {
 	u16int length;
 	u8int matrix_type:4;
 	u8int identifier:4;
-	u16int ncodes;
-	u8int value[];
+	u8int ncodes[16];
+	u8int values[];
 }__attribute__ ((__packed__));
 
 #endif

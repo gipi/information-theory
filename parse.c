@@ -204,6 +204,49 @@ static unsigned int read_quantization_table(FILE* f) {
 	return length;
 }
 
+/* algorithm from specification (pg55) */
+static unsigned int* generate_size_table(u8int bits[]) {
+	static unsigned int huffsize[256];
+	unsigned int k = 0, i = 1, j = 1;
+	while (i <= 16) {
+		if (j > bits[i]) {
+			i++;
+			j = 1;
+		} else {
+			huffsize[k] = i;
+			k++;
+			j++;
+		}
+	}
+
+	huffsize[k] = 0;
+
+	return huffsize;
+}
+
+/* TODO: rewrite better (maybe understand also what this means) */
+static unsigned int* generate_code_table(unsigned int huffsize[]) {
+	unsigned int k = 0, code = 0, si = huffsize[0];
+
+	static unsigned int huffcode[4096];
+
+	while (huffsize[k]) {
+		huffcode[k] = code;
+		code++;
+		k++;
+
+		if (!huffsize[k])
+			break;
+
+		while (huffsize[k] != si) {
+			code = code << 1;
+			si++;
+		}
+	}
+
+	return huffcode;
+}
+
 static unsigned int read_huffman_table(FILE* f) {
 	u16int length;
 	read_length_and_rewind(&length, f);
@@ -215,7 +258,29 @@ static unsigned int read_huffman_table(FILE* f) {
 	printf(" HUFFMAN TABLE (length: %u)\n", length);
 	printf(" matrix type: %d\n", ht->matrix_type);
 	printf(" identifier: %d\n", ht->identifier);
-	printf(" # codes: %d\n", htons(ht->ncodes));
+
+	/* here goes the code definition */
+	/* length (2 bytes) +
+	 * 	table class (4 bits) + table destinator (4 bits)
+	 */
+	u8int ncode = length - 3;
+	unsigned int cycle, scycle, n, idx = 0;
+	for (cycle = 0 ; cycle < 16 ; cycle++) {
+		n = ht->ncodes[cycle];
+		printf(" #codes of length %u: %u\n ", cycle + 1, n);
+		for (scycle = 0 ; scycle <  n ; scycle++) {
+			printf(" %u", ht->values[idx++]);
+		}
+		printf("\n");
+	}
+
+	unsigned int* hc = generate_code_table(generate_size_table(ht->ncodes));
+	cycle = 0;
+	printf(" code table:\n");
+	while (hc[cycle++]) {
+		printf(" %u", hc[cycle]);
+	}
+
 
 	return length;
 }
