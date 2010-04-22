@@ -169,20 +169,20 @@ static unsigned int read_start_of_frame(FILE* f) {
 	fread(sof, length, 1, f);
 
 	printf(" length: %u\n", htons(sof->length));
-	printf(" sample: %u\n", sof->sample);
-	printf(" Y: %04x\n", htons(sof->Y));
-	printf(" X: %04x\n", htons(sof->X));
-	printf(" #components: %u\n", sof->Nf);
+	printf(" %ux%u samples with precision %u bytes and %u components\n",
+			htons(sof->X), htons(sof->Y), sof->sample, sof->Nf);
 
 	unsigned int cycle;
 	printf( " SUBSAMPLING\n");
 	for (cycle = 0 ; cycle < sof->Nf ; cycle++ ) {
 		struct Nf_array nfa = sof->nf_array[cycle];
 		printf( " id: %u\n"
-			" HV sampling %hd:%hd\n\n",
+			" HV sampling %hd:%hd\n"
+			" Quant. table id %u\n\n",
 				nfa.id,
 				nfa.hv_sampling_factor & 15,
-				nfa.hv_sampling_factor >> 4);
+				nfa.hv_sampling_factor >> 4,
+				nfa.quant_table_number);
 	}
 
 	return length;

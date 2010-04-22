@@ -10,12 +10,6 @@ typedef unsigned short u16int;
 		(idx)++;\
 	}while(0)
 
-struct Nf_array {
-	u8int id;
-	u8int hv_sampling_factor;
-	u8int quant_table_number;
-};
-
 struct JFIF_header {
 	u16int length;
 	char identifier[4];
@@ -28,12 +22,18 @@ struct JFIF_header {
 	u8int RGB[][3];
 }__attribute__ ((__packed__));
 
+struct Nf_array {
+	u8int id;                 /* Component identifier */
+	u8int hv_sampling_factor; /* Horizontal-Vertical sampling factor */
+	u8int quant_table_number; 
+};
+
 struct start_of_frame{
 	u16int length;
-	u8int sample;
-	u16int Y;
-	u16int X;
-	u8int Nf;
+	u8int sample; /* Sample precision */
+	u16int Y;     /* Number of lines */
+	u16int X;     /* Number of samples per line */
+	u8int Nf;     /* Number of image components in frame */
 	struct Nf_array nf_array[];
 }__attribute__ ((__packed__));
 
