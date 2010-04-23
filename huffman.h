@@ -7,9 +7,15 @@
 
 typedef struct _node_t{
 	uint8_t symbol;
+	uint64_t weight;
 	struct _node* left;
 	struct _node* right;
 }node_t;
+
+typedef struct {
+	unsigned int length;
+	node_t* nodes;
+}three_t;
 
 typedef struct {
 	uint8_t symbol;
