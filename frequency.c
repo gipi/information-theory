@@ -1,7 +1,7 @@
 #include<frequency.h>
 
 
-unsigned long long int occourrence[0xff];
+unsigned long long int occurrence[0xff];
 
 void frequency_table_create_from_stream(FILE* ff) {
 	unsigned char c;
@@ -10,6 +10,6 @@ void frequency_table_create_from_stream(FILE* ff) {
 		if (feof(ff))
 			break;
 
-		occourrence[(int)c]++;
+		occurrence[(int)c]++;
 	}
 }

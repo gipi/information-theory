@@ -86,24 +86,24 @@ int main(int argc, char* argv[]) {
 		unsigned long long int total = 0;
 		/* first calculate the total */
 		for (cycle = 0 ; cycle < 0xff ; cycle++) {
-			total += occourrence[cycle];
+			total += occurrence[cycle];
 		}
 
 		fprintf(stderr, "total: %llu\n", total);
 
 		/* second rescale */
 		for (cycle = 0 ; cycle < 0xff ; cycle++) {
-			occourrence[cycle] = (double)occourrence[cycle]/(double)total*100;
+			occurrence[cycle] = (double)occurrence[cycle]/(double)total*100;
 		}
 	}
 
 	for (cycle = 0 ; cycle < 0xff ; cycle++) {
-		if (occourrence[cycle] == 0 && options.minimal)
+		if (occurrence[cycle] == 0 && options.minimal)
 			continue;
 		sprintf(byte, options.fmt, cycle);
 		fprintf(stdout, "%s%c%llu%s%c",
 			byte, options.between,
-			occourrence[cycle], options.percentual ? "%" : "",
+			occurrence[cycle], options.percentual ? "%" : "",
 			options.endline);
 	}
 
