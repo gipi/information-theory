@@ -2,6 +2,8 @@
 #include<stdlib.h>
 #include<string.h>
 
+#include<frequency.h>
+
 struct {
 	int minimal:1;
 	int binary:1;
@@ -21,8 +23,6 @@ struct {
 	"\t-m\tminimal output (no zero occourence)\n" \
 	"\t-z\tbinary\n" \
 	"\t-f FMT\tbyte output format string\n"
-
-unsigned long long int occourrence[0xff];
 
 void usage(int exit_code) {
 	fprintf(stderr, USAGE_STR);
@@ -75,15 +75,7 @@ int main(int argc, char* argv[]) {
 		usage(0);
 
 	FILE* ff = stdin;
-
-	unsigned char c;
-	while(1){
-		c = fgetc(ff);
-		if (feof(ff))
-			break;
-
-		occourrence[(int)c]++;
-	}
+	frequency_table_create_from_stream(ff);
 
 	char byte[256];
 
