@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<inttypes.h>
 
 #include<frequency.h>
 #include<huffman.h>
@@ -27,7 +28,7 @@ void print_frequencies_table(frequency_table_t t) {
 	unsigned int cycle;
 	for (cycle = 0 ; cycle < t.length ; cycle++) {
 		frequency_row_t f =  t.frequencies[cycle];
-		printf(" %c\t%u\n", f.symbol, f.frequency);
+		printf(" %c\t%"PRIu64"\n", f.symbol, f.frequency);
 	}
 }
 
