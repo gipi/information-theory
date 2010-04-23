@@ -15,9 +15,10 @@ static void usage(int exit_code) {
 	exit(exit_code);
 }
 
+static int cmp_frequency(const void* a, const void* b) {
+	return ( (((frequency_row_t*)a)->frequency) > (((frequency_row_t*)b)->frequency) );
+}
 
-static cmp(const frequency_row_t* a, const frequency_row_t* b) {
-	return ( (a->frequency) > (b->frequency) );
 }
 
 void order_frequencies_table(frequency_table_t t) {
