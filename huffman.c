@@ -10,7 +10,7 @@
 	"\n" \
 	"encode/decode a stream by huffman coding\n"
 
-void usage(int exit_code) {
+static void usage(int exit_code) {
 	printf(USAGE_STR);
 	exit(exit_code);
 }
@@ -33,6 +33,9 @@ void print_frequencies_table(frequency_table_t t) {
 }
 
 int main(int argc, char* argv[]) {
+	if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 'h') {
+		usage(0);
+	}
 	frequency_table_create_from_stream(stdin);
 
 	unsigned int cycle, idx = 0;
