@@ -3,13 +3,13 @@
 
 #include<stdint.h>
 
-
+#define node_is_leaf(n) (!(n).left)
 
 typedef struct _node_t{
 	uint8_t symbol;
 	uint64_t weight;
-	struct _node* left;
-	struct _node* right;
+	struct _node_t* left;
+	struct _node_t* right;
 }node_t;
 
 typedef struct {
