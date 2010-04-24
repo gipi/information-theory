@@ -22,7 +22,8 @@ static int cmp_frequency(const void* a, const void* b) {
 }
 
 static void order_frequencies_table(frequency_table_t t) {
-	qsort(t.frequencies, t.length, sizeof(frequency_row_t), cmp);
+	qsort(t.frequencies, t.length,
+		sizeof(frequency_row_t), cmp_frequency);
 }
 
 static void print_frequencies_table(frequency_table_t t) {
