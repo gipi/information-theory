@@ -35,10 +35,15 @@ static void print_frequencies_table(frequency_table_t t) {
 }
 
 int main(int argc, char* argv[]) {
-	if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 'h') {
-		usage(0);
+	FILE* f = stdin;
+	if (argc > 1) {
+		if (argv[1][0] == '-' && argv[1][1] == 'h')
+			usage(0);
+
+		f = fopen(argv[1], "r");
 	}
-	frequency_table_create_from_stream(stdin);
+
+	frequency_table_create_from_stream(f);
 
 	unsigned int cycle, idx = 0;
 	frequency_row_t* ft = NULL;
