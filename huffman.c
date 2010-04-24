@@ -21,11 +21,11 @@ static int cmp_frequency(const void* a, const void* b) {
 
 }
 
-void order_frequencies_table(frequency_table_t t) {
+static void order_frequencies_table(frequency_table_t t) {
 	qsort(t.frequencies, t.length, sizeof(frequency_row_t), cmp);
 }
 
-void print_frequencies_table(frequency_table_t t) {
+static void print_frequencies_table(frequency_table_t t) {
 	unsigned int cycle;
 	for (cycle = 0 ; cycle < t.length ; cycle++) {
 		frequency_row_t f =  t.frequencies[cycle];
