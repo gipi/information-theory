@@ -15,12 +15,20 @@ typedef struct _node_t{
 typedef struct {
 	unsigned int length;
 	node_t* nodes;
-}three_t;
+}tree_t;
 
 typedef struct {
 	uint8_t symbol;
 	uint64_t frequency;
 }frequency_row_t;
+
+typedef struct {
+	uint8_t symbol;
+	uint64_t nbits;
+}huffman_t;
+
+extern huffman_t* Huffman;
+extern unsigned int HuffmanLength;
 
 typedef struct {
 	unsigned int length;
