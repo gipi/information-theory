@@ -9,7 +9,13 @@
 #define USAGE_STR \
 	"usage: huffman [options] [filename]\n" \
 	"\n" \
-	"encode/decode a stream by huffman coding\n"
+	"encode/decode a stream by huffman coding\n" \
+	"\n" \
+	"options:\n" \
+	"\t-h\tprint this help\n" \
+	"\t-f\tprint frequencies for symbol\n" \
+	"\t-c\tprint canonical code\n" \
+	"\t-d\tdecompress the filename\n"
 
 static void usage(int exit_code) {
 	printf(USAGE_STR);
