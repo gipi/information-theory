@@ -42,7 +42,8 @@ typedef struct {
 }huffman_row_t;
 
 typedef struct {
-	huffman_row_t row;
+	unsigned int length;
+	huffman_row_t* rows;
 }huffman_table_t;
 
 /* write symbols to file pointed by fd using the ht huffman table */

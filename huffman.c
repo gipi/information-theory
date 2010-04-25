@@ -158,6 +158,56 @@ void node_free(node_t* n) {
 		;//free(n);
 }
 
+int cmp_huffman_nbits(const void* a, const void* b) {
+	huffman_t* ha = ((huffman_t*)a);
+	huffman_t* hb = ((huffman_t*)b);
+
+	return (ha->nbits > hb->nbits);
+}
+
+static void Huffman_order_ny_nbits(void) {
+	qsort(Huffman, HuffmanLength, sizeof(huffman_t), cmp_huffman_nbits);
+}
+
+#define GET_NTH(b,n) (((b) & (1 << (n))) ? 1 : 0)
+
+static void huffman_code_print(huffman_row_t row) {
+	uint8_t length = row.code_size;
+	unsigned int cycle;
+	for (cycle = 0 ; cycle < length; cycle++){
+		printf("%u", GET_NTH(row.code, length - 1 - cycle));
+	}
+
+}
+
+/* see http://en.wikipedia.org/wiki/Canonical_Huffman_code */
+static huffman_table_t Huffman_canonicalize(void) {
+	Huffman_order_ny_nbits();
+	huffman_row_t* hrows = malloc(sizeof(huffman_row_t)*HuffmanLength);
+
+	unsigned int cycle;
+	uint64_t nbits = Huffman[0].nbits;
+
+	/* first code */
+	hrows[0].code_size = nbits;
+	hrows[0].symbol = Huffman[0].symbol;
+	hrows[0].code = 0;
+
+	for (cycle = 1 ; cycle < HuffmanLength ; cycle++) {
+		hrows[cycle].symbol = Huffman[cycle].symbol;
+		hrows[cycle].code = hrows[cycle - 1].code + 1;
+		hrows[cycle].code_size = Huffman[cycle].nbits;
+
+		if (hrows[cycle].code_size > hrows[cycle - 1].code_size)
+			hrows[cycle].code <<= 1;
+	}
+
+	return (huffman_table_t){
+		.length = HuffmanLength,
+		.rows = hrows
+	};
+}
+
 /*
  * Free all the memory.
  */
