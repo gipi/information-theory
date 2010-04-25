@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<inttypes.h>
+#include<getopt.h>
 
 #include<frequency.h>
 #include<huffman.h>
@@ -140,7 +141,6 @@ static void node_walk(node_t n, const char* prefix) {
 			.symbol = n.symbol,
 			.nbits  = length
 		};
-		printf("%c\t%s\n", n.symbol, prefix);
 	} else {
 		node_walk(*n.left, left_prefix);
 		node_walk(*n.right, right_prefix);
@@ -220,12 +220,28 @@ void tree_free(tree_t t) {
 
 int main(int argc, char* argv[]) {
 	FILE* f = stdin;
-	if (argc > 1) {
-		if (argv[1][0] == '-' && argv[1][1] == 'h')
-			usage(0);
 
-		f = fopen(argv[1], "r");
+	char opt;
+	unsigned int print_canonical = 0;
+	while ((opt = getopt(argc, argv, "fcdh")) != -1) {
+		switch (opt) {
+			case 'h':
+				usage(0);
+				break;
+			case 'f':
+				break;
+			case 'c':
+				print_canonical = 1;
+				break;
+			case 'd':
+				break;
+			default:
+				usage(1);
+		}
 	}
+
+	if(argc > optind)
+		f = fopen(argv[1], "r");
 
 	frequency_table_create_from_stream(f);
 
@@ -248,7 +264,6 @@ int main(int argc, char* argv[]) {
 	};
 
 	order_frequencies_table(table);
-	print_frequencies_table(table);
 
 	tree_t* tree = tree_init(table);
 	/* TODO: check for memory leak */
@@ -266,11 +281,19 @@ int main(int argc, char* argv[]) {
 
 	node_walk(tree->nodes[0], "");
 
-	for (cycle = 0 ; cycle < HuffmanLength ; cycle++) {
-		printf(" %c\t%"PRIu64"\n",
-			Huffman[cycle].symbol, Huffman[cycle].nbits);
+
+	huffman_table_t final = Huffman_canonicalize();
+
+	if (print_canonical) {
+		for (cycle = 0 ; cycle < HuffmanLength; cycle++){
+			printf("%c\t", final.rows[cycle].symbol);
+			huffman_code_print(final.rows[cycle]);
+			printf("\n");
+		}
+		goto exit;
 	}
 	
+exit:
 	free(ft);
 	tree_free(*tree);
 	free(Huffman);
