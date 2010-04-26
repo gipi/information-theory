@@ -229,10 +229,11 @@ int main(int argc, char* argv[]) {
 	}
 
 	frequency_table_create_from_stream(f, FREQUENCY_SAVE_STREAM);
+	fprintf(stderr, " read %u bytes\n", frequency_get_stream_size());
 
 	unsigned int cycle, idx = 0;
 	frequency_row_t* ft = NULL;
-	for (cycle = 0 ; cycle < 0xff ; cycle++) {
+	for (cycle = 0 ; cycle < 0x100 ; cycle++) {
 		if (occurrence[cycle] == 0)
 			continue;
 

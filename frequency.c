@@ -3,7 +3,7 @@
 #include<frequency.h>
 
 
-unsigned long long int occurrence[0xff];
+unsigned long long int occurrence[0x100];
 
 unsigned char* Depot = NULL;
 unsigned int DepotIdx = 0;

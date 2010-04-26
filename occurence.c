@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	for (cycle = 0 ; cycle < 0xff ; cycle++) {
+	for (cycle = 0 ; cycle < 0x100 ; cycle++) {
 		if (occurrence[cycle] == 0 && options.minimal)
 			continue;
 		sprintf(byte, options.fmt, cycle);
