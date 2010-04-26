@@ -221,7 +221,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if(argc > optind) {
-		f = fopen(argv[1], "r");
+		f = fopen(argv[optind], "r");
 		if (!f) {
 			perror("error opening file");
 			exit(1);
