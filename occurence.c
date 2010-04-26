@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 		usage(0);
 
 	FILE* ff = stdin;
-	frequency_table_create_from_stream(ff);
+	frequency_table_create_from_stream(ff, FREQUENCY_DONT_SAVE_STREAM);
 
 	char byte[256];
 

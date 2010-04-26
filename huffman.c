@@ -228,7 +228,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	frequency_table_create_from_stream(f);
+	frequency_table_create_from_stream(f, FREQUENCY_SAVE_STREAM);
 
 	unsigned int cycle, idx = 0;
 	frequency_row_t* ft = NULL;
