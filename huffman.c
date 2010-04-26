@@ -116,25 +116,7 @@ static tree_t* tree_step(tree_t* t) {
 	return new_tree;
 }
 
-static void node_walk(node_t n, const char* prefix) {
-	unsigned int length = strlen(prefix);
-	/*
-	 * to allocate correctly a string we need to
-	 * allocate a byte more than needed cause
-	 * the '\0' byte to terminate the string.
-	 *
-	 * Morever we need calloc to initialize to zero
-	 * the new string.
-	 */
-	char* left_prefix  = calloc(1, length + 2);
-	char* right_prefix = calloc(1, length + 2);
-
-	/* maybe use strcat() */;
-	memcpy(left_prefix, prefix, length);
-	memcpy(right_prefix, prefix, length);
-
-	left_prefix[length]  = '0';
-	right_prefix[length] = '1';
+static void node_walk(node_t n, uint64_t length) {
 
 	if (node_is_leaf(n)) {
 		Huffman[HuffmanIdx++] = (huffman_t){
@@ -142,12 +124,10 @@ static void node_walk(node_t n, const char* prefix) {
 			.nbits  = length
 		};
 	} else {
-		node_walk(*n.left, left_prefix);
-		node_walk(*n.right, right_prefix);
+		node_walk(*n.left, length + 1);
+		node_walk(*n.right, length + 1);
 	}
 
-	free(left_prefix);
-	free(right_prefix);
 }
 
 void node_free(node_t* n) {
@@ -284,8 +264,8 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
-	node_walk(tree->nodes[0], "");
-
+	/* this fulls Huffman */
+	node_walk(tree->nodes[0], 0);
 
 	huffman_table_t final = Huffman_canonicalize();
 
