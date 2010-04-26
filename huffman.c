@@ -240,8 +240,13 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	if(argc > optind)
+	if(argc > optind) {
 		f = fopen(argv[1], "r");
+		if (!f) {
+			perror("error opening file");
+			exit(1);
+		}
+	}
 
 	frequency_table_create_from_stream(f);
 
