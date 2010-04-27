@@ -8,7 +8,7 @@ die () {
 	exit $?
 }
 
-[[ -f huffman ]] || die "huffman not found"
+[[ -f hm ]] || die "hm not found"
 
 TMPDIR=$(mktemp -d )
 
@@ -19,7 +19,7 @@ a	10
 b	11
 EOF
 
-diff ${TMPDIR}/huffman-c-output.txt <(echo -n 'abcd' | ./huffman -c) || \
+diff ${TMPDIR}/huffman-c-output.txt <(echo -n 'abcd' | ./hm -c) || \
 	die "test failed"
 
 rm -fr ${TMPDIR}

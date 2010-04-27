@@ -1,12 +1,14 @@
 CPPFLAGS = -I. -Wall -g
 
-BIN = occurence huffman bits
+BIN = occurence hm bits
 
 all: $(BIN)
 
 frequency.o: frequency.h
-huffman.o: huffman.h frequency.h
-huffman: huffman.o frequency.o
+huffman/huffman.o: huffman/huffman.h frequency.h utils/bits.h
+
+hm.o: frequency.h huffman/huffman.h
+hm: hm.o huffman/huffman.o frequency.o utils/bits.o
 
 bits: bits.o utils/bits.o
 utils/bits.o: utils/bits.h
