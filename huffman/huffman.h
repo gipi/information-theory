@@ -20,10 +20,11 @@ typedef struct {
 
 typedef struct {
 	uint8_t symbol;
-}huffman_t;
+	uint8_t nbits;
+}__attribute__((__packed__)) huffman_t;
 
 extern huffman_t* Huffman;
-extern unsigned int HuffmanLength;
+extern uint8_t HuffmanLength;
 typedef struct {
 	uint8_t symbol;
 	uint8_t code_size;

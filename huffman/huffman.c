@@ -14,7 +14,7 @@
 
 
 huffman_t* Huffman = NULL;
-unsigned int HuffmanLength;
+uint8_t HuffmanLength;
 unsigned int HuffmanIdx = 0;
 
 static int cmp_nodes(const void* a, const void* b) {
