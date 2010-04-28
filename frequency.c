@@ -48,3 +48,21 @@ void frequency_table_create_from_stream(FILE* ff, frequency_save_t save) {
 		}
 	}
 }
+
+void print_frequencies_table(frequency_table_t t) {
+	unsigned int cycle;
+	for (cycle = 0 ; cycle < t.length ; cycle++) {
+		frequency_row_t f =  t.frequencies[cycle];
+		printf(" %c\t%"PRIu64"\n", f.symbol, f.frequency);
+	}
+}
+
+static int cmp_frequency(const void* a, const void* b) {
+	return ( (((frequency_row_t*)a)->frequency) > (((frequency_row_t*)b)->frequency) );
+}
+
+void order_frequencies_table(frequency_table_t t) {
+	qsort(t.frequencies, t.length,
+		sizeof(frequency_row_t), cmp_frequency);
+}
+
