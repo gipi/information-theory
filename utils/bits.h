@@ -36,5 +36,6 @@ void printf_16bits(uint16_t bits);
 uint64_t create_mask_from_msb(
 	uint8_t size, uint8_t start, uint8_t delta);
 void write_bits(uint8_t* buffer, uint64_t bits, uint8_t length);
+uint64_t read_bits(uint8_t* buffer, uint8_t length, int advance);
 
 #endif
