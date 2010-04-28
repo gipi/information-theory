@@ -27,14 +27,23 @@ void printf_16bits(uint16_t bits) {
 		NTH(bits, 0));
 }
 
-/* create a mask */
-static inline uint64_t create_mask_from_msb(
+/*
+ * create a mask of size bits starting from the start-th most
+ * significant bit for the following delta bits.
+ *
+ * EXAMPLES:
+ *
+ * 	create_mask_from_msb(8, 0, 8) ---> 11111111
+ * 	create_mask_from_msb(8, 2, 6) ---> 00111111
+ * 	create_mask_from_msb(8, 2, 3) ---> 00111000
+ */
+inline uint64_t create_mask_from_msb(
 	uint8_t size, uint8_t start, uint8_t delta)
 {
 	uint64_t mask = 0;
 	unsigned int cycle;
 	for (cycle = 0 ; cycle < delta; cycle++){
-		mask |= (1 << (size - start - cycle));
+		mask |= (1 << (size - start - cycle - 1));
 	}
 
 	return mask;
