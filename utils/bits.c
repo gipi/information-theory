@@ -2,35 +2,10 @@
 #include<stdlib.h>
 #include<inttypes.h>
 
-#define NTH(b, n) ((b) & (1 << n) ? 1 : 0)
-#define BITIFY(a,n) ((a) ? (1 << (n)): 0)
-#define BITS(a,b,c,d,e,f,g,h) ( BITIFY(a, 7) | \
-	BITIFY(b,6) | \
-	BITIFY(c,5) | \
-	BITIFY(d,4) | \
-	BITIFY(e,3) | \
-	BITIFY(f,2) | \
-	BITIFY(g,1) | \
-	BITIFY(h,0)  )
-#define LONGBITS(a,b,c,d,e,f,g,h,i,l,m,n,o,p,q,r) ( \
-	BITIFY(a,15) | \
-	BITIFY(b,14) | \
-	BITIFY(c,13) | \
-	BITIFY(d,12) | \
-	BITIFY(e,11) | \
-	BITIFY(f,10) | \
-	BITIFY(g,9) | \
-	BITIFY(h,8) | \
-	BITIFY(i,7) | \
-	BITIFY(l,6) | \
-	BITIFY(m,5) | \
-	BITIFY(n,4) | \
-	BITIFY(o,3) | \
-	BITIFY(p,2) | \
-	BITIFY(q,1) | \
-	BITIFY(r,0)  )
+#include<utils/bits.h>
 
-static void printf_byte(uint8_t bits) {
+
+void printf_byte(uint8_t bits) {
 	printf("%u%u%u%u%u%u%u%u\n",
 		NTH(bits, 7),
 		NTH(bits, 6), NTH(bits, 5),
@@ -39,7 +14,7 @@ static void printf_byte(uint8_t bits) {
 		NTH(bits, 0));
 }
 
-static void printf_16bits(uint16_t bits) {
+void printf_16bits(uint16_t bits) {
 	printf("%u%u%u%u%u%u%u%u%u%u%u%u%u%u%u%u\n",
 		NTH(bits, 15),
 		NTH(bits, 14), NTH(bits, 13),
@@ -56,7 +31,7 @@ static void printf_16bits(uint16_t bits) {
 static inline uint64_t create_mask_from_msb(
 	uint8_t size, uint8_t start, uint8_t delta)
 {
-	uint64_t mask;
+	uint64_t mask = 0;
 	unsigned int cycle;
 	for (cycle = 0 ; cycle < delta; cycle++){
 		mask |= (1 << (size - start - cycle));
@@ -103,63 +78,4 @@ void write_bits(uint8_t* buffer, uint64_t bits, uint8_t length) {
 		buffer[buffer_idx] |= bits_to_write;
 		bits_idx += length;
 	}
-}
-
-int main(int argc, char* argv[]) {
-	if(argc == 2) {
-		unsigned int value = atoi(argv[1]);
-		if (value > 0xff) {
-			fprintf(stderr, "value too much\n");
-			exit(1);
-		}
-		printf_byte(value);
-		return 0;
-	}
-
-	printf("0000100001011111   expected\n");
-	printf_16bits(LONGBITS(0,0,0,0,1,0,0,0,0,1,0,1,1,1,1,1));
-
-	unsigned char* buffer = calloc(1, 3);
-	write_bits(buffer, BITS(0,1,0,1,1,0,0,0), 8);
-
-	printf("01011000   expected\n");
-	printf_byte(buffer[0]);
-
-	puts(" ---");
-	write_bits(buffer, BITS(0,0,0,0,0,1,0,0), 4);
-	printf("01011000   expected\n");
-	printf_byte(buffer[0]);
-	printf("01000000   expected\n");
-	printf_byte(buffer[1]);
-
-	puts(" ---");
-	write_bits(buffer, BITS(0,0,0,0,0,0,1,0), 3);
-	printf("01000100   expected\n");
-	printf_byte(buffer[1]);
-
-	puts(" ---");
-	write_bits(buffer, BITS(0,0,0,0,0,0,0,1), 1);
-	printf("01000101   expected\n");
-	printf_byte(buffer[1]);
-
-	puts(" ---");
-	write_bits(buffer, BITS(0,0,0,0,0,0,0,1), 1);
-	printf("01000101   expected\n");
-	printf_byte(buffer[1]);
-	printf("10000000   expected\n");
-	printf_byte(buffer[2]);
-
-	return 0;
-
-	puts(" ---");
-	uint64_t tmp = LONGBITS(0,0,0,0,1,0,0,0,0,1,0,1,1,1,1,1);
-	write_bits(buffer, tmp, 1);
-	printf("01000101   expected\n");
-	printf_byte(buffer[1]);
-	printf("00001011   expected\n");
-	printf_byte(buffer[2]);
-	printf("11100000   expected\n");
-	printf_byte(buffer[3]);
-
-	return 0;
 }
