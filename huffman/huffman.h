@@ -48,5 +48,7 @@ size_t huffman_get_encoded_size(huffman_table_t t,
 size_t huffman_write_symbols(int fd, huffman_table_t ht,
 	uint8_t* symbols, size_t length);
 size_t huffman_read_symbols(int fd, huffman_table_t ht, uint8_t* symbols);
+uint64_t huffman_canonicalize_step(
+	uint64_t previous_code, uint8_t previous_size, uint8_t new_size);
 
 #endif

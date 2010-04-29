@@ -134,6 +134,18 @@ void huffman_code_print(huffman_row_t row) {
 
 }
 
+uint64_t huffman_canonicalize_step(
+	uint64_t previous_code, uint8_t previous_size, uint8_t new_size) {
+
+	uint64_t new_code;
+	new_code = previous_code + 1;
+
+	if (new_size > previous_size)
+		new_code <<= 1;
+
+	return new_code;
+}
+
 /* see http://en.wikipedia.org/wiki/Canonical_Huffman_code */
 huffman_table_t Huffman_canonicalize(void) {
 	Huffman_order_by_nbits();
@@ -149,11 +161,11 @@ huffman_table_t Huffman_canonicalize(void) {
 
 	for (cycle = 1 ; cycle < HuffmanLength ; cycle++) {
 		hrows[cycle].symbol = Huffman[cycle].symbol;
-		hrows[cycle].code = hrows[cycle - 1].code + 1;
 		hrows[cycle].code_size = Huffman[cycle].nbits;
-
-		if (hrows[cycle].code_size > hrows[cycle - 1].code_size)
-			hrows[cycle].code <<= 1;
+		hrows[cycle].code = huffman_canonicalize_step(
+			hrows[cycle - 1].code,
+			hrows[cycle - 1].code_size,
+			hrows[cycle].code_size);
 	}
 
 	return (huffman_table_t){
