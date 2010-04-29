@@ -127,3 +127,80 @@ uint64_t read_bits(uint8_t* buffer, uint8_t length, int advance) {
 
 	return value;
 }
+
+/******* FILE API ***************************/
+
+/* this contains private data */
+struct {
+	uint8_t byte;
+	/* bit position in the byte (0 = msb, 7 = lsb) */
+	uint8_t bits_idx;
+	uint8_t eof;
+}_file;
+
+static int _file_read_a_byte(FILE* f) {
+	return fread(&_file.byte, sizeof(uint8_t), 1, f);
+}
+
+/*
+ * Move internal pointer.
+ *
+ * TODO: make bits_offset works.
+ */
+int fseek_bits(FILE* f, long byte_offset, long bits_offset, int whence) {
+	return fseek(f, byte_offset, whence);
+}
+
+int fread_init(FILE* f) {
+	_file.bits_idx = 0;
+	return 0;//_file_read_a_byte(f);
+}
+
+/* TODO: the stream has to be seekable */
+size_t fread_bits(uint64_t* value, uint8_t length, int advance, FILE* f) {
+	static uint8_t status = 0;
+	uint8_t old_seek_bits = _file.bits_idx;
+	uint8_t seek = 0;
+
+	uint8_t nbits_available = (8 - _file.bits_idx);
+	uint64_t the_mask = 0;
+
+	/* if bits_idx == 0 then read a byte from the stream */
+	if (!_file.bits_idx) {
+		status = _file_read_a_byte(f);
+		if (status < 1)
+			return status;
+		seek++;
+	}
+
+	if (length > nbits_available) {
+		the_mask = create_mask_from_msb(
+			length, _file.bits_idx, nbits_available);
+		*value = _file.byte & the_mask;
+
+		/* update the internal file position */
+		_file.bits_idx = 0;
+
+		/* adjust value */
+		*value <<= length - nbits_available;
+		/* read remaining bits */
+		uint64_t new_value;
+		status = fread_bits(&new_value,
+			length - nbits_available, advance, f);
+		*value |= new_value;
+	} else {
+		the_mask = create_mask_from_msb(8, _file.bits_idx, length);
+		*value = _file.byte & the_mask;
+		*value >>= (nbits_available - length);
+		_file.bits_idx = (_file.bits_idx + length) % 8;
+	}
+
+	/* */
+	if (!advance) {
+		if (fseek_bits(f, -seek, 0, SEEK_CUR) < 0)
+			perror("fseek_bits");
+		_file.bits_idx = old_seek_bits;
+	}
+
+	return status;
+}
