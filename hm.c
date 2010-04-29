@@ -69,49 +69,13 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	frequency_table_create_from_stream(f, FREQUENCY_SAVE_STREAM);
-	fprintf(stderr, " read %u bytes\n", frequency_get_stream_size());
 
-	unsigned int cycle, idx = 0;
-	frequency_row_t* ft = NULL;
-	for (cycle = 0 ; cycle < 0x100 ; cycle++) {
-		if (occurrence[cycle] == 0)
-			continue;
 
-		ft = realloc(ft, sizeof(frequency_row_t)*++idx);
-		ft[idx - 1] = (frequency_row_t){
-			.symbol = cycle,
-			.frequency = occurrence[cycle]
-		};
-	}
 
-	frequency_table_t table = {
-		.length = idx,
-		.frequencies = ft
-	};
 
-	order_frequencies_table(table);
-	if (print_frequencies)
-		print_frequencies_table(table);
+	huffman_table_t final = huffman_canonical_from_stream(f);
 
-	tree_t* tree = tree_init(table);
-	/* TODO: check for memory leak */
-	while (tree->length > 1) {
-		tree = tree_step(tree);
-	}
-
-	Huffman = malloc(sizeof(huffman_t)*table.length);
-	HuffmanLength = table.length;
-
-	if(!Huffman) {
-		perror("error allocating memory");
-		exit(1);
-	}
-
-	/* this fulls Huffman */
-	node_walk(tree->nodes[0], 0);
-
-	huffman_table_t final = Huffman_canonicalize();
+	unsigned int cycle;
 
 	if (print_canonical) {
 		for (cycle = 0 ; cycle < HuffmanLength; cycle++){
@@ -146,8 +110,6 @@ int main(int argc, char* argv[]) {
 
 	fwrite(buffer, sizeof(uint8_t), new_size + 1, stdout);
 exit:
-	free(ft);
-	tree_free(*tree);
 	free(Huffman);
 
 	return 0;

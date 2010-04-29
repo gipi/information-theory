@@ -213,5 +213,49 @@ size_t huffman_get_encoded_size(
 	}
 
 	return (float)(nsize/8);
+}
+
+huffman_table_t huffman_canonical_from_stream(FILE* f) {
+	frequency_table_create_from_stream(f, FREQUENCY_SAVE_STREAM);
+	fprintf(stderr, " read %u bytes\n", frequency_get_stream_size());
+
+	unsigned int cycle, idx = 0;
+	frequency_row_t* ft = NULL;
+	for (cycle = 0 ; cycle < 0x100 ; cycle++) {
+		if (occurrence[cycle] == 0)
+			continue;
+
+		ft = realloc(ft, sizeof(frequency_row_t)*++idx);
+		ft[idx - 1] = (frequency_row_t){
+			.symbol = cycle,
+			.frequency = occurrence[cycle]
+		};
+	}
+
+	frequency_table_t table = {
+		.length = idx,
+		.frequencies = ft
+	};
+
+	order_frequencies_table(table);
+
+	tree_t* tree = tree_init(table);
+	/* TODO: check for memory leak */
+	while (tree->length > 1) {
+		tree = tree_step(tree);
+	}
+
+	Huffman = malloc(sizeof(huffman_t)*table.length);
+	HuffmanLength = table.length;
+
+	if(!Huffman) {
+		perror("error allocating memory");
+		exit(1);
+	}
+
+	/* this fulls Huffman */
+	node_walk(tree->nodes[0], 0);
+
+	return Huffman_canonicalize();
 
 }
