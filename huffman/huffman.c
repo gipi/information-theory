@@ -119,7 +119,7 @@ int cmp_huffman_nbits(const void* a, const void* b) {
 	return (ha->nbits > hb->nbits);
 }
 
-static void Huffman_order_ny_nbits(void) {
+static void Huffman_order_by_nbits(void) {
 	qsort(Huffman, HuffmanLength, sizeof(huffman_t), cmp_huffman_nbits);
 }
 
@@ -136,7 +136,7 @@ void huffman_code_print(huffman_row_t row) {
 
 /* see http://en.wikipedia.org/wiki/Canonical_Huffman_code */
 huffman_table_t Huffman_canonicalize(void) {
-	Huffman_order_ny_nbits();
+	Huffman_order_by_nbits();
 	huffman_row_t* hrows = malloc(sizeof(huffman_row_t)*HuffmanLength);
 
 	unsigned int cycle;
