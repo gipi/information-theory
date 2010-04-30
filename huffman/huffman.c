@@ -1,11 +1,13 @@
+#define _POSIX_SOURCE
+#define _BSD_SOURCE
+#include<features.h>
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<inttypes.h>
 #include<assert.h>
 #include<getopt.h>
-
-#define _BSD_SOURCE
 #include<endian.h>
 
 #include<frequency.h>
