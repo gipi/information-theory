@@ -8,6 +8,9 @@
 #include<inttypes.h>
 #include<assert.h>
 #include<getopt.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<unistd.h>
 #include<endian.h>
 
 #include<frequency.h>
@@ -259,5 +262,91 @@ huffman_table_t huffman_canonical_from_stream(FILE* f) {
 	node_walk(tree->nodes[0], 0);
 
 	return Huffman_canonicalize();
+}
 
+huffman_table_t huffman_table_read_from_stream(FILE* f) {
+	if (!Huffman)
+		Huffman = calloc(sizeof(huffman_t), 0x100);
+	fread(&HuffmanLength, sizeof(HuffmanLength), 1, f);
+	fread(Huffman, sizeof(huffman_t), HuffmanLength, f);
+
+	return Huffman_canonicalize();
+}
+
+/* look and advance */
+/*
+ * On error return -1.
+ */
+static int huffman_look_for_code(
+	uint8_t* symbol, huffman_table_t t, FILE* f)
+{
+	unsigned int cycle, status = 0;
+	uint64_t value = 0;
+	uint8_t old_code_size = 0;
+	huffman_row_t row;
+	for (cycle = 0 ; cycle < t.length ; cycle++) {
+		row = t.rows[cycle];
+
+		/* is useless to re-read the value*/
+		if (row.code_size != old_code_size) {
+			old_code_size = row.code_size;
+			status = fread_bits(&value, row.code_size, 0, f);
+		}
+
+		if(status == -1)
+			return status;
+
+		if (value != row.code)
+			continue;
+
+		fread_bits(&value, row.code_size, 1, f);
+		if (ferror(f)) {
+			perror(__FILE__);
+			clearerr(f);
+		}
+
+		*symbol = row.symbol;
+
+		return 0;
+	}
+
+	fprintf(stderr, "fatal: code not found at 0x%lu\n"
+		" value: ", ftell(f));
+	fprintf(stderr, "EOF: %u\tError: %u\n", feof(f), ferror(f));
+	//printf_16bits(value);
+
+	return -1;
+}
+
+#define BUFFER_SIZE 1024
+
+uint8_t* huffman_decode(size_t* size, huffman_table_t t, FILE* f) {
+	/* 
+	 *
+	 */
+	uint8_t* buffer =
+		calloc(sizeof(uint8_t), sizeof(uint8_t)*BUFFER_SIZE);
+	if (!buffer)
+		return NULL;
+
+	*size = 1024;
+	size_t actual_size = 0;
+
+	uint8_t symbol;
+	while (!feof(f)) {
+		if(huffman_look_for_code(&symbol, t, f) < 0)
+			break;
+
+		buffer[actual_size++] = symbol;
+		if (actual_size > *size) {
+			*size = ((float)*size/BUFFER_SIZE + 1)*BUFFER_SIZE;
+			buffer = realloc(buffer, *size);
+			if (!buffer)
+				return NULL;
+		}
+	}
+
+	*size = actual_size;
+
+	return buffer;/* TODO */
 }
