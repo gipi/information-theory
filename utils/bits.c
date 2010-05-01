@@ -169,13 +169,13 @@ size_t fread_bits(uint64_t* value, uint8_t length, int advance, FILE* f) {
 	if (!_file.bits_idx) {
 		status = _file_read_a_byte(f);
 		if (status < 1)
-			return status;
+			return -1;
 		seek++;
 	}
 
 	if (length > nbits_available) {
 		the_mask = create_mask_from_msb(
-			length, _file.bits_idx, nbits_available);
+			8, _file.bits_idx, nbits_available);
 		*value = _file.byte & the_mask;
 
 		/* update the internal file position */
@@ -192,7 +192,7 @@ size_t fread_bits(uint64_t* value, uint8_t length, int advance, FILE* f) {
 		the_mask = create_mask_from_msb(8, _file.bits_idx, length);
 		*value = _file.byte & the_mask;
 		*value >>= (nbits_available - length);
-		_file.bits_idx = (_file.bits_idx + length) % 8;
+		_file.bits_idx += length;
 	}
 
 	/* */
