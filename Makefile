@@ -2,7 +2,7 @@ CPPFLAGS = -I. -Wall -g
 
 SRC=$(wildcard *.c *.h)
 
-BIN = occurence hm bits fbits
+BIN = occurence hm fbits
 
 all: $(BIN) tags
 
@@ -12,9 +12,7 @@ huffman/huffman.o: huffman/huffman.h frequency.h utils/bits.h
 hm.o: frequency.h huffman/huffman.h
 hm: hm.o huffman/huffman.o frequency.o utils/bits.o
 
-bits: bits.o utils/bits.o
 utils/bits.o: utils/bits.h
-bits.o: utils/bits.h
 
 fbits: fbits.o utils/bits.o
 fbits.o: utils/bits.h
