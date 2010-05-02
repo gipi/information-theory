@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
 	unsigned int cycle;
 
 	if (print_canonical) {
-		for (cycle = 0 ; cycle < HuffmanLength; cycle++){
+		for (cycle = 0 ; cycle < HuffmanLength + 1 ; cycle++){
 			printf("%c\t", final.rows[cycle].symbol);
 			huffman_code_print(final.rows[cycle]);
 			printf("\n");
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
 
 	/* first print huffman canonical coding */
 	fwrite(&HuffmanLength, sizeof(uint8_t), 1, stdout);
-	fwrite(Huffman, sizeof(huffman_t), HuffmanLength, stdout);
+	fwrite(Huffman, sizeof(huffman_t), HuffmanLength + 1, stdout);
 
 	uint8_t* buffer = calloc(1, new_size + 1);
 	huffman_row_t hr;
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 		hr = huffman_get_code_from_symbol(final, content[cycle]);
 		write_bits(buffer, hr.code, hr.code_size);
 	}
-	fprintf(stderr, " table size: %u\n", (HuffmanLength * 2) + 1);
+	fprintf(stderr, " table size: %u\n", ((HuffmanLength + 1) * 2) + 1);
 	fprintf(stderr, " encoded in %u bytes\n", new_size);
 
 	fwrite(buffer, sizeof(uint8_t), new_size + 1, stdout);

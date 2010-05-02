@@ -24,6 +24,7 @@ typedef struct {
 }__attribute__((__packed__)) huffman_t;
 
 extern huffman_t* Huffman;
+/* this contains the number of symbol - 1 to avoid overflow */
 extern uint8_t HuffmanLength;
 
 typedef struct {

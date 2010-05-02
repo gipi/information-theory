@@ -125,7 +125,7 @@ int cmp_huffman_nbits(const void* a, const void* b) {
 }
 
 static void Huffman_order_by_nbits(void) {
-	qsort(Huffman, HuffmanLength, sizeof(huffman_t), cmp_huffman_nbits);
+	qsort(Huffman, HuffmanLength + 1, sizeof(huffman_t), cmp_huffman_nbits);
 }
 
 #define GET_NTH(b,n) (((b) & (1 << (n))) ? 1 : 0)
@@ -154,7 +154,8 @@ uint64_t huffman_canonicalize_step(
 /* see http://en.wikipedia.org/wiki/Canonical_Huffman_code */
 huffman_table_t Huffman_canonicalize(void) {
 	Huffman_order_by_nbits();
-	huffman_row_t* hrows = malloc(sizeof(huffman_row_t)*HuffmanLength);
+	huffman_row_t* hrows =
+		malloc(sizeof(huffman_row_t)*(HuffmanLength + 1));
 
 	unsigned int cycle;
 	uint64_t nbits = Huffman[0].nbits;
@@ -164,7 +165,7 @@ huffman_table_t Huffman_canonicalize(void) {
 	hrows[0].symbol = Huffman[0].symbol;
 	hrows[0].code = 0;
 
-	for (cycle = 1 ; cycle < HuffmanLength ; cycle++) {
+	for (cycle = 1 ; cycle < HuffmanLength + 1 ; cycle++) {
 		hrows[cycle].symbol = Huffman[cycle].symbol;
 		hrows[cycle].code_size = Huffman[cycle].nbits;
 		hrows[cycle].code = huffman_canonicalize_step(
@@ -174,7 +175,7 @@ huffman_table_t Huffman_canonicalize(void) {
 	}
 
 	return (huffman_table_t){
-		.length = HuffmanLength,
+		.length = HuffmanLength + 1,
 		.rows = hrows
 	};
 }
@@ -251,7 +252,7 @@ huffman_table_t huffman_canonical_from_stream(FILE* f) {
 	}
 
 	Huffman = malloc(sizeof(huffman_t)*table.length);
-	HuffmanLength = table.length;
+	HuffmanLength = table.length - 1;
 
 	if(!Huffman) {
 		perror("error allocating memory");
@@ -268,7 +269,7 @@ huffman_table_t huffman_table_read_from_stream(FILE* f) {
 	if (!Huffman)
 		Huffman = calloc(sizeof(huffman_t), 0x100);
 	fread(&HuffmanLength, sizeof(HuffmanLength), 1, f);
-	fread(Huffman, sizeof(huffman_t), HuffmanLength, f);
+	fread(Huffman, sizeof(huffman_t), HuffmanLength + 1, f);
 
 	return Huffman_canonicalize();
 }
