@@ -6,6 +6,8 @@ BIN = occurence hm fbits
 
 all: $(BIN) tags
 
+data_structure/tree.o: data_structure/tree.h
+
 frequency.o: frequency.h
 
 huffman/huffman.o: CPPFLAGS += -Wpacked
