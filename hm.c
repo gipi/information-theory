@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
 	FILE* f = stdin;
 
 	char opt;
-	unsigned int print_canonical = 0, print_frequencies = 0;
+	unsigned int print_canonical = 0,
+		decompress = 0;
 	while ((opt = getopt(argc, argv, "fcdh")) != -1) {
 		switch (opt) {
 			case 'h':
@@ -55,6 +56,7 @@ int main(int argc, char* argv[]) {
 				print_canonical = 1;
 				break;
 			case 'd':
+				decompress = 1;
 				break;
 			default:
 				usage(1);
@@ -69,9 +71,25 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	if (decompress) {
+		uint8_t symbol;
+		size_t size = 0;
+		/* read huffman canonical table from file */
+		huffman_table_t t = huffman_table_read_from_stream(f);
+		/* decode stream */
+		while (!feof(f)) {
+			if(huffman_decode_one_symbol(&symbol, t, f) < 0)
+				break;
+			if(fwrite(&symbol, sizeof(uint8_t), 1, stdout) < 1)
+				if(ferror(f))
+					perror("error decoding");
+			size++;
+		}
 
+		fprintf(stderr, " decoded %u bytes\n", size);
 
-
+		goto exit;
+	}
 
 	huffman_table_t final = huffman_canonical_from_stream(f);
 
