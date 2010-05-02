@@ -7,6 +7,8 @@ BIN = occurence hm fbits
 all: $(BIN) tags
 
 frequency.o: frequency.h
+
+huffman/huffman.o: CPPFLAGS += -Wpacked
 huffman/huffman.o: huffman/huffman.h frequency.h utils/bits.h
 
 hm.o: frequency.h huffman/huffman.h
