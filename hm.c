@@ -49,9 +49,6 @@ int main(int argc, char* argv[]) {
 			case 'h':
 				usage(0);
 				break;
-			case 'f':
-				print_frequencies = 1;
-				break;
 			case 'c':
 				print_canonical = 1;
 				break;
@@ -104,7 +101,7 @@ int main(int argc, char* argv[]) {
 	}
 
 
-	if (print_canonical || print_frequencies)
+	if (print_canonical)
 		goto exit;
 
 	uint8_t* content = frequency_get_stream_content();
