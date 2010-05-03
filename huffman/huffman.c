@@ -53,7 +53,7 @@ static node_t* node_create_from_symbol(frequency_table_t t) {
 	return nodes;
 }
 
-tree_t* tree_init(frequency_table_t t) {
+tree_t* tree_init_from_frequencies(frequency_table_t t) {
 	tree_t* tree = malloc(sizeof(tree_t));
 
 	tree->length = t.length;
@@ -62,6 +62,7 @@ tree_t* tree_init(frequency_table_t t) {
 	return tree;
 }
 
+/* nodes has to be ordered */
 static node_t node_create_from_lower_frequencies(node_t* nodes) {
 	/* the first two nodes are the candidates */
 	node_t n = (node_t){
@@ -245,7 +246,7 @@ huffman_table_t huffman_canonical_from_stream(FILE* f) {
 
 	order_frequencies_table(table);
 
-	tree_t* tree = tree_init(table);
+	tree_t* tree = tree_init_from_frequencies(table);
 	/* TODO: check for memory leak */
 	while (tree->length > 1) {
 		tree = tree_step(tree);
@@ -319,35 +320,6 @@ static int huffman_look_for_code(
 	return -1;
 }
 
-#define BUFFER_SIZE 1024
-
-uint8_t* huffman_decode(size_t* size, huffman_table_t t, FILE* f) {
-	/* 
-	 *
-	 */
-	uint8_t* buffer =
-		calloc(sizeof(uint8_t), sizeof(uint8_t)*BUFFER_SIZE);
-	if (!buffer)
-		return NULL;
-
-	*size = 1024;
-	size_t actual_size = 0;
-
-	uint8_t symbol;
-	while (!feof(f)) {
-		if(huffman_look_for_code(&symbol, t, f) < 0)
-			break;
-
-		buffer[actual_size++] = symbol;
-		if (actual_size > *size) {
-			*size = ((float)*size/BUFFER_SIZE + 1)*BUFFER_SIZE;
-			buffer = realloc(buffer, *size);
-			if (!buffer)
-				return NULL;
-		}
-	}
-
-	*size = actual_size;
-
-	return buffer;/* TODO */
+int huffman_decode_one_symbol(uint8_t* symbol, huffman_table_t t, FILE* f) {
+	return huffman_look_for_code(symbol, t, f);
 }

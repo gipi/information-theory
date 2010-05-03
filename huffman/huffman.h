@@ -38,13 +38,13 @@ typedef struct {
 	huffman_row_t* rows;
 }huffman_table_t;
 
-tree_t* tree_init(frequency_table_t t);
+tree_t* tree_init_from_frequencies(frequency_table_t t);
 tree_t* tree_step(tree_t* t);
 void node_walk(node_t n, uint64_t length);
 huffman_table_t Huffman_canonicalize(void);
 huffman_table_t huffman_canonical_from_stream(FILE* f);
 huffman_table_t huffman_table_read_from_stream(FILE* f);
-uint8_t* huffman_decode(size_t*, huffman_table_t t, FILE* f);
+int huffman_decode_one_symbol(uint8_t*, huffman_table_t t, FILE* f);
 void huffman_code_print(huffman_row_t row);
 huffman_row_t huffman_get_code_from_symbol(huffman_table_t t, uint8_t symb);
 size_t huffman_get_encoded_size(huffman_table_t t,
