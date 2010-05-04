@@ -41,6 +41,7 @@ typedef struct _node_t{
 typedef node_t tree_t;
 
 node_t* node(void*);
+node_t* node_and_memcpy(void*, size_t);
 node_t* node_append(node_t* parent, node_t* left, node_t* right);
 tree_t tree_init(void);
 

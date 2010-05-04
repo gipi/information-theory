@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include<stdlib.h>
+#include<string.h>
 
 #include<data_structure/tree.h>
 
@@ -26,6 +27,16 @@ node_t* node(void* data) {
 	n->right = NULL;
 	
 	return n;
+}
+
+node_t* node_and_memcpy(void* data, size_t size) {
+	void* new_data = malloc(size);
+	if (!new_data)
+		return new_data;
+
+	memcpy(new_data, data, size);
+
+	return node(new_data);
 }
 
 /*
