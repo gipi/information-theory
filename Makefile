@@ -2,11 +2,13 @@ CPPFLAGS = -I. -Wall -g
 
 SRC=$(wildcard *.c *.h)
 
-BIN = occurence hm fbits
+BIN = occurence hm fbits test-tree
 
 all: $(BIN) tags
 
 data_structure/tree.o: data_structure/tree.h
+test-tree: data_structure/tree.c
+	$(CC) $(CPPFLAGS) -D__TEST__ $< -o $@
 
 frequency.o: frequency.h
 

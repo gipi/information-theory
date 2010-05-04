@@ -127,6 +127,13 @@ int main() {
 
 	printf("the total is %d\n", sum);
 
+	node_t* test_is_leaf = node(NULL);
+	node_t* test_is_not_leaf_left = node_append(NULL, parent, NULL);
+
+	fprintf(stdout, " expected 1: %d\n", node_is_leaf(*test_is_leaf));
+	fprintf(stdout, " expected 0: %d\n",
+		node_is_leaf(*test_is_not_leaf_left));
+
 	tree_free(parent);
 
 	return 0;
