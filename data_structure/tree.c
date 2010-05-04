@@ -86,7 +86,7 @@ int tree_traverse(tree_t* root, unsigned int depth, node_callback_t cb) {
 	 * this has to do for last in case the callback acts
 	 * with the allocation of the parent.
 	 */
-	status = cb(root, depth);
+	status += cb(root, depth);
 
 	return status;
 }
