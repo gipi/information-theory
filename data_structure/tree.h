@@ -43,6 +43,8 @@ typedef node_t tree_t;
 node_t* node(void*);
 node_t* node_and_memcpy(void*, size_t);
 node_t* node_append(node_t* parent, node_t* left, node_t* right);
+node_t* node_append_memcpy(node_t* parent,
+	void* data1, void* data2, size_t size);
 tree_t tree_init(void);
 
 typedef int (*node_callback_t)(node_t* n, unsigned int depth);

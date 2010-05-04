@@ -60,6 +60,14 @@ node_t* node_append(node_t* parent, node_t* left, node_t* right) {
 	return parent;
 }
 
+node_t* node_append_memcpy(node_t* parent,
+		void* data1, void* data2, size_t size)
+{
+	node_t* n1 = node_and_memcpy(data1, size);
+	node_t* n2 = node_and_memcpy(data2, size);
+
+	return node_append(parent, n1, n2);
+}
 /*
  * Recursively call itself.
  *
