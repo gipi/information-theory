@@ -13,131 +13,160 @@
 #include<unistd.h>
 #include<endian.h>
 
+#include<data_structure/tree.h>
 #include<frequency.h>
 #include<huffman/huffman.h>
 #include<utils/bits.h>
 
 
-huffman_t* Huffman = NULL;
+huffman_canon_t* Huffman = NULL;
 uint8_t HuffmanLength;
 unsigned int HuffmanIdx = 0;
 
-static int cmp_nodes(const void* a, const void* b) {
-	return ( (((node_t*)a)->weight) > (((node_t*)b)->weight) );
+huffman_t* huffman(uint8_t symbol, uint8_t code_size, uint64_t code) {
+	/* FIX: check pointer */
+	huffman_t* h = malloc(sizeof(huffman_t));
+	h->symbol = symbol;
+	h->code_size = code_size;
+	h->code = code;
+
+	return h;
 }
 
-static void order_tree(tree_t t) {
-	qsort(t.nodes, t.length, sizeof(node_t), cmp_nodes);
+/* temporary struct for build the huffman tree */
+struct h_tmp {
+	uint8_t symbol;
+	uint64_t weight;/* the last one has weight 0 */
+};
+
+/* not using a macro we can use it during a gdb session */
+static inline struct h_tmp*  node_to_data(node_t n) {
+	return ((struct h_tmp*)((n).data));
 }
 
+static int cmp_node_weight(const void* a, const void* b) {
+	node_t na = **(node_t**)a;
+	node_t nb = **(node_t**)b;
+	return -(node_to_data(na)->weight - node_to_data(nb)->weight);
+}
 
-static void tree_dump(tree_t t) {
+/*
+ * Generate the node by which create the tree. If end_of_stream
+ * is 1 add one symbol with weight 1 to indicate the end of
+ * the data stream.
+ */
+static struct h_tmp* node_create_from_symbol(
+	frequency_table_t t, int end_of_stream)
+{
+	/* TODO: eos check? */
+	unsigned int length = t.length + 1 + end_of_stream;
+	struct h_tmp* nodes = malloc(sizeof(struct h_tmp)*length);
 	unsigned int cycle;
-	printf("WEIGHT\n");
-	for (cycle = 0 ; cycle < t.length ; cycle++) {
-		printf("%"PRIu64"\n", t.nodes[cycle].weight);
-	}
-}
+	frequency_row_t row;
 
-static node_t* node_create_from_symbol(frequency_table_t t) {
-	/* TODO: memory cleaning */
-	node_t* nodes = malloc(sizeof(node_t)*t.length);
-	unsigned int cycle;
 	for (cycle = 0 ; cycle < t.length ; cycle++) {
-		nodes[cycle] = (node_t){
+		row = t.frequencies[cycle];
+		nodes[cycle] = (struct h_tmp){
 			.symbol = t.frequencies[cycle].symbol,
 			.weight = t.frequencies[cycle].frequency
 		};
 	}
 
+	if (end_of_stream) {
+		nodes[length - 2] = (struct h_tmp){
+			.weight = 1
+		};
+	}
+
+	nodes[length - 1].weight = 0;
+
 	return nodes;
 }
 
-tree_t* tree_init_from_frequencies(frequency_table_t t) {
-	tree_t* tree = malloc(sizeof(tree_t));
+tree_t* tree_from_frequencies_table(frequency_table_t t, int eos) {
+	struct h_tmp* node_datas = node_create_from_symbol(t, eos);
 
-	tree->length = t.length;
-	tree->nodes = node_create_from_symbol(t);
+	unsigned int length = t.length + eos;
 
-	return tree;
-}
+	/* create nodes */
+	node_t** nodes = malloc(sizeof(node_t)*length);
 
-/* nodes has to be ordered */
-static node_t node_create_from_lower_frequencies(node_t* nodes) {
-	/* the first two nodes are the candidates */
-	node_t n = (node_t){
-		.weight = nodes[0].weight + nodes[1].weight,
-		.left  = (struct _node_t*)&nodes[0],
-		.right = (struct _node_t*)&nodes[1]
-	};
-
-	return n;
-}
-
-tree_t* tree_step(tree_t* t) {
-	tree_t* new_tree = malloc(sizeof(tree_t));
-	new_tree->length = t->length - 1;
-	new_tree->nodes = malloc(sizeof(node_t)*new_tree->length);
-	/* copy the last nodes minus the first */
-	memcpy(new_tree->nodes,
-		t->nodes + 1, sizeof(node_t)*new_tree->length);
-
-	/* the two nodes going to make the new node */
-	new_tree->nodes[0] = node_create_from_lower_frequencies(t->nodes);
-	order_tree(*new_tree);
-
-	/*
-	 * We need all the nodes to allow the leaf walking
-	 * when do node_walk().
-	free(t->nodes);
-	*/
-	free(t);
-
-	return new_tree;
-}
-
-void node_walk(node_t n, uint64_t length) {
-
-	if (node_is_leaf(n)) {
-		Huffman[HuffmanIdx++] = (huffman_t){
-			.symbol = n.symbol,
-			.nbits  = length
-		};
-	} else {
-		node_walk(*n.left, length + 1);
-		node_walk(*n.right, length + 1);
+	unsigned int cycle;
+	for (cycle = 0 ; node_datas[cycle].weight ; cycle++) {
+		/* FIX: use node_and_memcpy() */
+		nodes[cycle] = node(&node_datas[cycle]);
 	}
 
+	tree_t* root = NULL;
+	node_t* new_node;
+	node_t* last_one,* last_two;
+	/* main loop */
+	while (length > 1) {
+		/* order it */
+		qsort(nodes, length, sizeof(node_t*), cmp_node_weight);
+		last_one = nodes[length - 1];
+		last_two = nodes[length - 2];
+
+		/* build a new data node with the last two weight */
+		struct h_tmp h_new = (struct h_tmp){
+			.weight = node_to_data(*last_one)->weight
+				+ node_to_data(*last_two)->weight
+		};
+		/* append this last two */
+		new_node = node_and_memcpy(&h_new, sizeof(struct h_tmp));
+		root = node_append(new_node, last_one, last_two);
+		nodes[length - 2] = root;
+		length--;
+	}
+
+	/* free useless struct h_tmp array */
+	//free(node_datas);/* see above FIX:*/
+	free(nodes);
+
+	return root;
 }
 
-void node_free(node_t* n) {
-	if (!node_is_leaf(*n)) {
-		node_free(n->left);
-		node_free(n->right);
-	} else /* valgrind tell me invalid free() */
-		;//free(n);
+int build_canonical_from_tree(node_t* n, unsigned int depth) {
+	if (node_is_leaf(*n)) {
+		Huffman[HuffmanIdx++] = (huffman_canon_t){
+			.symbol = node_to_data(*n)->symbol,
+			.nbits  = depth
+		};
+	}
+
+	return 0;
 }
 
-int cmp_huffman_nbits(const void* a, const void* b) {
-	huffman_t* ha = ((huffman_t*)a);
-	huffman_t* hb = ((huffman_t*)b);
+static int cmp_huffman_nbits(const void* a, const void* b) {
+	huffman_canon_t* ha = ((huffman_canon_t*)a);
+	huffman_canon_t* hb = ((huffman_canon_t*)b);
 
-	return (ha->nbits > hb->nbits);
+	return (ha->nbits - hb->nbits);
+}
+
+static int cmp_huffman_symbol(const void* a, const void* b) {
+	huffman_canon_t* ha = ((huffman_canon_t*)a);
+	huffman_canon_t* hb = ((huffman_canon_t*)b);
+
+	return (ha->symbol - hb->symbol);
 }
 
 static void Huffman_order_by_nbits(void) {
-	qsort(Huffman, HuffmanLength + 1, sizeof(huffman_t), cmp_huffman_nbits);
+	qsort(Huffman, HuffmanLength + 1, sizeof(huffman_canon_t), cmp_huffman_nbits);
+}
+
+static void Huffman_order_by_symbol(void) {
+	qsort(Huffman, HuffmanLength + 1, sizeof(huffman_canon_t), cmp_huffman_symbol);
 }
 
 #define GET_NTH(b,n) (((b) & (1 << (n))) ? 1 : 0)
 
-void huffman_code_print(huffman_row_t row) {
+void huffman_code_print(huffman_t row) {
 	uint8_t length = row.code_size;
 	unsigned int cycle;
 	for (cycle = 0 ; cycle < length; cycle++){
 		printf("%u", GET_NTH(row.code, length - 1 - cycle));
 	}
-
 }
 
 uint64_t huffman_canonicalize_step(
@@ -153,10 +182,12 @@ uint64_t huffman_canonicalize_step(
 }
 
 /* see http://en.wikipedia.org/wiki/Canonical_Huffman_code */
-huffman_table_t Huffman_canonicalize(void) {
+huffman_t* Huffman_build_canonicalize_representation(void) {
+	/* move */
 	Huffman_order_by_nbits();
-	huffman_row_t* hrows =
-		malloc(sizeof(huffman_row_t)*(HuffmanLength + 1));
+	Huffman_order_by_symbol();
+	huffman_t* hrows =
+		malloc(sizeof(huffman_t)*(HuffmanLength + 2));
 
 	unsigned int cycle;
 	uint64_t nbits = Huffman[0].nbits;
@@ -175,44 +206,33 @@ huffman_table_t Huffman_canonicalize(void) {
 			hrows[cycle].code_size);
 	}
 
-	return (huffman_table_t){
-		.length = HuffmanLength + 1,
-		.rows = hrows
-	};
-}
+	hrows[HuffmanLength + 1].code_size = 0;
 
-/*
- * Free all the memory.
- */
-void tree_free(tree_t t) {
-	unsigned int cycle;
-	for (cycle = 0 ; cycle < t.length ; cycle++) {
-		node_free(t.nodes);
-	}
-}
+	/* TODO: add last element with code_size = 0 */
 
+	return hrows;
+}
 
 /* to avoid O(n^2) we can create an array so to have O(1) */
-huffman_row_t huffman_get_code_from_symbol(huffman_table_t t, uint8_t symbol) {
-	unsigned int cycle;
-	huffman_row_t row;
-	for (cycle = 0 ; cycle < t.length; cycle++){
+huffman_t huffman_get_code_from_symbol(huffman_t* t, uint8_t symbol) {
+	huffman_t row;
 
-		row = t.rows[cycle];
+	unsigned int cycle;
+	for (cycle = 0 ; t[cycle].code_size ; cycle++){
+		row = t[cycle];
 		if (row.symbol == symbol)
 			return row;
 	}
 
 	/* this is not possible */
 	assert(!"not symbol found in table");
-
 }
 
 size_t huffman_get_encoded_size(
-	huffman_table_t t, uint8_t* buffer, size_t size)
+	huffman_t* t, uint8_t* buffer, size_t size)
 {
 	unsigned int cycle;
-	huffman_row_t row;
+	huffman_t row;
 	size_t nsize = 0;/* nsize is in bits, size in bytes */
 	for (cycle = 0 ; cycle < size; cycle++){
 		row = huffman_get_code_from_symbol(t, buffer[cycle]);
@@ -222,7 +242,8 @@ size_t huffman_get_encoded_size(
 	return (float)(nsize/8);
 }
 
-huffman_table_t huffman_canonical_from_stream(FILE* f) {
+/* build the Huffman array from the stream */
+void Huffman_build_from_stream(FILE* f) {
 	frequency_table_create_from_stream(f, FREQUENCY_SAVE_STREAM);
 	fprintf(stderr, " read %u bytes\n", frequency_get_stream_size());
 
@@ -246,11 +267,9 @@ huffman_table_t huffman_canonical_from_stream(FILE* f) {
 
 	order_frequencies_table(table);
 
-	tree_t* tree = tree_init_from_frequencies(table);
-	/* TODO: check for memory leak */
-	while (tree->length > 1) {
-		tree = tree_step(tree);
-	}
+	/* build the huffman tree */
+	/* TODO: create a EOS global symbol */
+	tree_t* tree = tree_from_frequencies_table(table, 0);
 
 	Huffman = malloc(sizeof(huffman_t)*table.length);
 	HuffmanLength = table.length - 1;
@@ -260,19 +279,20 @@ huffman_table_t huffman_canonical_from_stream(FILE* f) {
 		exit(1);
 	}
 
-	/* this fulls Huffman */
-	node_walk(tree->nodes[0], 0);
+	/* now we build the canonical representation */
+	/* the result is stored in Huffman and HuffmanLength */
+	tree_traverse(tree, 0, build_canonical_from_tree);
 
-	return Huffman_canonicalize();
+	tree_free(tree);
 }
 
-huffman_table_t huffman_table_read_from_stream(FILE* f) {
+/* build Huffman from the table read from the file */
+void Huffman_load_from_stream(FILE* f) {
+	/* FIXME: 0x100 ---> HuffmanLength */
 	if (!Huffman)
 		Huffman = calloc(sizeof(huffman_t), 0x100);
 	fread(&HuffmanLength, sizeof(HuffmanLength), 1, f);
 	fread(Huffman, sizeof(huffman_t), HuffmanLength + 1, f);
-
-	return Huffman_canonicalize();
 }
 
 /* look and advance */
@@ -280,14 +300,14 @@ huffman_table_t huffman_table_read_from_stream(FILE* f) {
  * On error return -1.
  */
 static int huffman_look_for_code(
-	uint8_t* symbol, huffman_table_t t, FILE* f)
+	uint8_t* symbol, huffman_t* t, FILE* f)
 {
 	unsigned int cycle, status = 0;
 	uint64_t value = 0;
 	uint8_t old_code_size = 0;
-	huffman_row_t row;
-	for (cycle = 0 ; cycle < t.length ; cycle++) {
-		row = t.rows[cycle];
+	huffman_t row;
+	for (cycle = 0 ; t[cycle].code_size ; cycle++) {
+		row = t[cycle];
 
 		/* is useless to re-read the value*/
 		if (row.code_size != old_code_size) {
@@ -320,6 +340,6 @@ static int huffman_look_for_code(
 	return -1;
 }
 
-int huffman_decode_one_symbol(uint8_t* symbol, huffman_table_t t, FILE* f) {
+int huffman_decode_one_symbol(uint8_t* symbol, huffman_t* t, FILE* f) {
 	return huffman_look_for_code(symbol, t, f);
 }

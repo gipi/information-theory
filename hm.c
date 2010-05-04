@@ -71,8 +71,10 @@ int main(int argc, char* argv[]) {
 	if (decompress) {
 		uint8_t symbol;
 		size_t size = 0;
-		/* read huffman canonical table from file */
-		huffman_table_t t = huffman_table_read_from_stream(f);
+		/* read Huffman table from file */
+		Huffman_load_from_stream(f);
+		huffman_t* t = Huffman_build_canonicalize_representation();
+
 		/* decode stream */
 		while (!feof(f)) {
 			if(huffman_decode_one_symbol(&symbol, t, f) < 0)
@@ -88,14 +90,15 @@ int main(int argc, char* argv[]) {
 		goto exit;
 	}
 
-	huffman_table_t final = huffman_canonical_from_stream(f);
+	Huffman_build_from_stream(f);
+	huffman_t* final = Huffman_build_canonicalize_representation();
 
 	unsigned int cycle;
 
 	if (print_canonical) {
-		for (cycle = 0 ; cycle < HuffmanLength + 1 ; cycle++){
-			printf("%c\t", final.rows[cycle].symbol);
-			huffman_code_print(final.rows[cycle]);
+		for (cycle = 0 ; final[cycle].code_size ; cycle++){
+			printf("%c\t", final[cycle].symbol);
+			huffman_code_print(final[cycle]);
 			printf("\n");
 		}
 	}
@@ -115,7 +118,7 @@ int main(int argc, char* argv[]) {
 	fwrite(Huffman, sizeof(huffman_t), HuffmanLength + 1, stdout);
 
 	uint8_t* buffer = calloc(1, new_size + 1);
-	huffman_row_t hr;
+	huffman_t hr;
 	for (cycle = 0 ; cycle < stream_length ; cycle++) {
 		hr = huffman_get_code_from_symbol(final, content[cycle]);
 		write_bits(buffer, hr.code, hr.code_size);

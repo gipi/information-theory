@@ -14,7 +14,7 @@ huffman/huffman.o: CPPFLAGS += -Wpacked
 huffman/huffman.o: huffman/huffman.h frequency.h utils/bits.h
 
 hm.o: frequency.h huffman/huffman.h
-hm: hm.o huffman/huffman.o frequency.o utils/bits.o
+hm: hm.o huffman/huffman.o frequency.o utils/bits.o data_structure/tree.o
 
 utils/bits.o: utils/bits.h
 
