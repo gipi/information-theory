@@ -45,7 +45,9 @@ node_t* node_and_memcpy(void*, size_t);
 node_t* node_append(node_t* parent, node_t* left, node_t* right);
 tree_t tree_init(void);
 
-typedef int (*node_callback_t)(node_t* n);
-int tree_traverse(tree_t*, node_callback_t);
+typedef int (*node_callback_t)(node_t* n, unsigned int depth);
+int tree_traverse(tree_t*, unsigned int depth, node_callback_t);
+
+void tree_free(tree_t* t);
 
 #endif

@@ -61,36 +61,36 @@ node_t* node_append(node_t* parent, node_t* left, node_t* right) {
 }
 
 /*
- * Recursively call itself
+ * Recursively call itself.
  *
  * Return value: 0 on success, 1 on error.
  */
-int tree_traverse(tree_t* root, node_callback_t callback) {
+int tree_traverse(tree_t* root, unsigned int depth, node_callback_t cb) {
 	int status;
 
 	if (root->left)
-		status  = tree_traverse(root->left, callback);
+		status  = tree_traverse(root->left, depth + 1, cb);
 
 	if (root->right)
-		status += tree_traverse(root->right, callback);
+		status += tree_traverse(root->right, depth + 1, cb);
 
 	/*
 	 * this has to do for last in case the callback acts
 	 * with the allocation of the parent.
 	 */
-	status = callback(root);
+	status = cb(root, depth);
 
 	return status;
 }
 
-static int free_callback(node_t* n) {
+static int free_callback(node_t* n, unsigned int depth) {
 	free(n);
 
 	return 0;
 }
 
 void tree_free(tree_t* t) {
-	tree_traverse(t, free_callback);
+	tree_traverse(t, 0, free_callback);
 }
 
 #ifdef __TEST__
@@ -98,7 +98,7 @@ void tree_free(tree_t* t) {
 
 int sum = 0;
 
-int my_callback(node_t* n) {
+int sum_callback(node_t* n, unsigned int depth) {
 	sum += *(int*)n->data;
 
 	return 0;
@@ -115,7 +115,7 @@ int main() {
 	node_t* parent = node_append(NULL, n1, n2);
 	parent->data = &data3;
 
-	tree_traverse(parent, my_callback);
+	tree_traverse(parent, 0, sum_callback);
 
 	printf("the total is %d\n", sum);
 
