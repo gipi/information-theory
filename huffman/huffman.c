@@ -294,7 +294,7 @@ void Huffman_load_from_stream(FILE* f) {
 	if (!Huffman)
 		Huffman = calloc(sizeof(huffman_t), 0x100);
 	fread(&HuffmanLength, sizeof(HuffmanLength), 1, f);
-	fread(Huffman, sizeof(huffman_t), HuffmanLength + 1, f);
+	fread(Huffman, sizeof(huffman_canon_t), HuffmanLength + 1, f);
 }
 
 /* look and advance */

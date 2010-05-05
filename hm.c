@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
 
 	/* first print huffman canonical coding */
 	fwrite(&HuffmanLength, sizeof(uint8_t), 1, stdout);
-	fwrite(Huffman, sizeof(huffman_t), HuffmanLength + 1, stdout);
+	fwrite(Huffman, sizeof(huffman_canon_t), HuffmanLength + 1, stdout);
 
 	uint8_t* buffer = calloc(1, new_size + 1);
 	huffman_t hr;
