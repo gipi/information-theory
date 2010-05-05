@@ -243,9 +243,9 @@ size_t huffman_get_encoded_size(
 }
 
 /* build the Huffman array from the stream */
-void Huffman_build_from_stream(FILE* f) {
-	frequency_table_create_from_stream(f, FREQUENCY_SAVE_STREAM);
-	fprintf(stderr, " read %u bytes\n", frequency_get_stream_size());
+int Huffman_build_from_stream(FILE* f) {
+	int nbytes = frequency_table_create_from_stream(
+		f, FREQUENCY_SAVE_STREAM);
 
 	unsigned int cycle, idx = 0;
 	frequency_row_t* ft = NULL;
@@ -284,6 +284,8 @@ void Huffman_build_from_stream(FILE* f) {
 	tree_traverse(tree, 0, build_canonical_from_tree);
 
 	tree_free(tree);
+
+	return nbytes;
 }
 
 /* build Huffman from the table read from the file */

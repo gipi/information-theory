@@ -22,7 +22,7 @@ typedef enum {
 	FREQUENCY_SAVE_STREAM
 }frequency_save_t;
 
-void frequency_table_create_from_stream(FILE* ff, frequency_save_t save);
+int frequency_table_create_from_stream(FILE* ff, frequency_save_t save);
 void print_frequencies_table(frequency_table_t t);
 void order_frequencies_table(frequency_table_t t);
 unsigned char* frequency_get_stream_content(void);

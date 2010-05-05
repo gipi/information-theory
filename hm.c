@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 		goto exit;
 	}
 
-	Huffman_build_from_stream(f);
+	int stream_length = Huffman_build_from_stream(f);
 	huffman_t* final = Huffman_build_canonicalize_representation();
 
 	unsigned int cycle;
@@ -108,7 +108,6 @@ int main(int argc, char* argv[]) {
 		goto exit;
 
 	uint8_t* content = frequency_get_stream_content();
-	size_t stream_length = frequency_get_stream_size();
 
 	size_t new_size = huffman_get_encoded_size(
 			final, content, stream_length);
@@ -123,6 +122,8 @@ int main(int argc, char* argv[]) {
 		hr = huffman_get_code_from_symbol(final, content[cycle]);
 		write_bits(buffer, hr.code, hr.code_size);
 	}
+
+	fprintf(stderr, " read %u bytes\n", stream_length);
 	fprintf(stderr, " table size: %u\n", ((HuffmanLength + 1) * 2) + 1);
 	fprintf(stderr, " encoded in %u bytes\n", new_size);
 

@@ -32,14 +32,19 @@ inline unsigned int frequency_get_stream_size(void) {
 	return DepotIdx;
 }
 
-void frequency_table_create_from_stream(FILE* ff, frequency_save_t save) {
+/*
+ * Return value: number of bytes read.
+ */
+int frequency_table_create_from_stream(FILE* ff, frequency_save_t save) {
 	unsigned char c;
+	size_t nbytes = 0;
 	Depot = malloc(DEPOT_SIZE);
 	while(1){
 		c = fgetc(ff);
 		if (feof(ff))
 			break;
 
+		nbytes++;
 		occurrence[(int)c]++;
 
 		/* save in Depot the content of the stream */
@@ -47,6 +52,8 @@ void frequency_table_create_from_stream(FILE* ff, frequency_save_t save) {
 			Depot_save(c);
 		}
 	}
+
+	return nbytes;
 }
 
 void print_frequencies_table(frequency_table_t t) {

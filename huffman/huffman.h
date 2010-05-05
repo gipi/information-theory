@@ -28,7 +28,7 @@ typedef struct {
 huffman_t* huffman(uint8_t symbol, uint8_t code_size, uint64_t code);
 
 huffman_t* Huffman_build_canonicalize_representation(void);
-void Huffman_build_from_stream(FILE* f);
+int Huffman_build_from_stream(FILE* f);
 void Huffman_load_from_stream(FILE* f);
 int huffman_decode_one_symbol(uint8_t*, huffman_t* h, FILE* f);
 void huffman_code_print(huffman_t h);
