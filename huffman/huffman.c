@@ -176,7 +176,7 @@ uint64_t huffman_canonicalize_step(
 	new_code = previous_code + 1;
 
 	if (new_size > previous_size)
-		new_code <<= 1;
+		new_code <<= (new_size - previous_size);
 
 	return new_code;
 }
