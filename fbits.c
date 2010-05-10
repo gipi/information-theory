@@ -20,12 +20,17 @@ int main(int argc, char* argv[]) {
 	fread_init(f);
 
 	unsigned int idx = 1;
+	int code_size = 0;
 	if (argc > 2) {
 		while (++idx < argc) {
-			if(fread_bits(&value, atoi(argv[idx]), 1, f) < 1)
+			code_size = atoi(argv[idx]);
+			if(fread_bits(&value, code_size, 1, f) < 1)
 				printf(" fread_bits returns < 1\n");
 			printf("ftell: %ld ", ftell(f));
-			printf_byte(value);
+			if (code_size > 8)
+				printf_16bits(value);
+			else
+				printf_byte(value);
 		}
 	}
 
