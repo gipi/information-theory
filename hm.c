@@ -68,17 +68,24 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	int stream_length;
+
 	if (decompress) {
 		uint8_t symbol;
 		size_t size = 0;
 		/* read Huffman table from file */
 		Huffman_load_from_stream(f);
+		/* TODO: check ferror() */
+		fread(&stream_length, sizeof(stream_length), 1, f);
+
 		huffman_t* t = Huffman_build_canonicalize_representation();
 
 		/* decode stream */
-		while (!feof(f)) {
-			if(huffman_decode_one_symbol(&symbol, t, f) < 0)
+		/* TODO: check feof() */
+		while (size < stream_length) {
+			if(huffman_decode_one_symbol(&symbol, t, f) < 0) {
 				break;
+			}
 			if(fwrite(&symbol, sizeof(uint8_t), 1, stdout) < 1)
 				if(ferror(f))
 					perror("error decoding");
@@ -90,7 +97,8 @@ int main(int argc, char* argv[]) {
 		goto exit;
 	}
 
-	int stream_length = Huffman_build_from_stream(f);
+	stream_length = Huffman_build_from_stream(f);
+
 	huffman_t* final = Huffman_build_canonicalize_representation();
 
 	unsigned int cycle;
@@ -115,6 +123,8 @@ int main(int argc, char* argv[]) {
 	/* first print huffman canonical coding */
 	fwrite(&HuffmanLength, sizeof(uint8_t), 1, stdout);
 	fwrite(Huffman, sizeof(huffman_canon_t), HuffmanLength + 1, stdout);
+	/* last write the size of original stream */
+	fwrite(&stream_length, sizeof(stream_length), 1, stdout);
 
 	uint8_t* buffer = calloc(1, new_size + 1);
 	huffman_t hr;
