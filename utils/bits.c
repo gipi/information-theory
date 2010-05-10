@@ -160,6 +160,7 @@ int fread_init(FILE* f) {
 size_t fread_bits(uint64_t* value, uint8_t length, int advance, FILE* f) {
 	static uint8_t status = 0;
 	uint8_t old_seek_bits = _file.bits_idx;
+	uint8_t old_byte = _file.byte;
 	uint8_t seek = 0;
 
 	uint8_t nbits_available = (8 - _file.bits_idx);
@@ -200,6 +201,7 @@ size_t fread_bits(uint64_t* value, uint8_t length, int advance, FILE* f) {
 		if (fseek_bits(f, -seek, 0, SEEK_CUR) < 0)
 			perror("fseek_bits");
 		_file.bits_idx = old_seek_bits;
+		_file.byte = old_byte;
 	}
 
 	return status;
