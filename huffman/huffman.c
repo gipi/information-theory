@@ -183,9 +183,6 @@ uint64_t huffman_canonicalize_step(
 
 /* see http://en.wikipedia.org/wiki/Canonical_Huffman_code */
 huffman_t* Huffman_build_canonicalize_representation(void) {
-	/* move */
-	Huffman_order_by_nbits();
-	Huffman_order_by_symbol();
 	huffman_t* hrows =
 		malloc(sizeof(huffman_t)*(HuffmanLength + 2));
 
@@ -284,6 +281,10 @@ int Huffman_build_from_stream(FILE* f) {
 	tree_traverse(tree, 0, build_canonical_from_tree);
 
 	tree_free(tree);
+
+	/* move */
+	Huffman_order_by_nbits();
+	Huffman_order_by_symbol();
 
 	return nbytes;
 }
