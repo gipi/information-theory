@@ -334,7 +334,7 @@ static int huffman_look_for_code(
 		return 0;
 	}
 
-	fprintf(stderr, "fatal: code not found at 0x%lu\n"
+	fprintf(stderr, "fatal: code not found at 0x%lx\n"
 		" value: ", ftell(f));
 	fprintf(stderr, "EOF: %u\tError: %u\n", feof(f), ferror(f));
 	//printf_16bits(value);

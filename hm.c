@@ -80,6 +80,10 @@ int main(int argc, char* argv[]) {
 		/* TODO: check ferror() */
 		fread(&stream_length, sizeof(stream_length), 1, f);
 
+		fprintf(stderr, " found %u symbols\n", HuffmanLength + 1);
+		fprintf(stderr, " original data length: %u\n",
+			stream_length);
+		fprintf(stderr, " data start at 0x%lx\n", ftell(f));
 		huffman_t* t = Huffman_build_canonicalize_representation();
 
 		/* decode stream */
@@ -108,7 +112,9 @@ int main(int argc, char* argv[]) {
 
 	if (print_canonical) {
 		for (cycle = 0 ; final[cycle].code_size ; cycle++){
-			printf("%c\t", final[cycle].symbol);
+			printf("%02x\t", final[cycle].symbol);
+			printf("%u\t", final[cycle].code_size);
+			printf("%"PRIx64"\t", final[cycle].code);
 			huffman_code_print(final[cycle]);
 			printf("\n");
 		}
