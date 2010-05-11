@@ -139,10 +139,15 @@ static int cmp_huffman_nbits(const void* a, const void* b) {
 }
 
 static int cmp_huffman_symbol(const void* a, const void* b) {
+	int status = 0;
+
 	huffman_canon_t* ha = ((huffman_canon_t*)a);
 	huffman_canon_t* hb = ((huffman_canon_t*)b);
 
-	return (ha->symbol - hb->symbol);
+	if (ha->nbits == hb->nbits)
+		status = (ha->symbol - hb->symbol);
+
+	return status;
 }
 
 static void Huffman_order_by_nbits(void) {
