@@ -51,15 +51,12 @@ static int cmp_node_weight(const void* a, const void* b) {
 }
 
 /*
- * Generate the node by which create the tree. If end_of_stream
- * is 1 add one symbol with weight 1 to indicate the end of
- * the data stream.
+ * Generate the node by which create the tree.
+ *
+ * The array returned is terminated with a element of weight zero.
  */
-static struct h_tmp* node_create_from_symbol(
-	frequency_table_t t, int end_of_stream)
-{
-	/* TODO: eos check? */
-	unsigned int length = t.length + 1 + end_of_stream;
+static struct h_tmp* node_create_from_symbol(frequency_table_t t) {
+	unsigned int length = t.length + 1;
 	struct h_tmp* nodes = malloc(sizeof(struct h_tmp)*length);
 	unsigned int cycle;
 	frequency_row_t row;
@@ -72,21 +69,16 @@ static struct h_tmp* node_create_from_symbol(
 		};
 	}
 
-	if (end_of_stream) {
-		nodes[length - 2] = (struct h_tmp){
-			.weight = 1
-		};
-	}
-
 	nodes[length - 1].weight = 0;
 
 	return nodes;
 }
 
-tree_t* tree_from_frequencies_table(frequency_table_t t, int eos) {
-	struct h_tmp* node_datas = node_create_from_symbol(t, eos);
+/* builds a tree from the frequencies table */
+tree_t* tree_from_frequencies_table(frequency_table_t t) {
+	struct h_tmp* node_datas = node_create_from_symbol(t);
 
-	unsigned int length = t.length + eos;
+	unsigned int length = t.length;
 
 	/* create nodes */
 	node_t** nodes = malloc(sizeof(node_t)*length);
@@ -100,6 +92,7 @@ tree_t* tree_from_frequencies_table(frequency_table_t t, int eos) {
 	tree_t* root = NULL;
 	node_t* new_node;
 	node_t* last_one,* last_two;
+
 	/* main loop */
 	while (length > 1) {
 		/* order it */
@@ -109,8 +102,8 @@ tree_t* tree_from_frequencies_table(frequency_table_t t, int eos) {
 
 		/* build a new data node with the last two weight */
 		struct h_tmp h_new = (struct h_tmp){
-			.weight = node_to_data(*last_one)->weight
-				+ node_to_data(*last_two)->weight
+			.weight = node_to_data(*last_one)->weight +
+				node_to_data(*last_two)->weight
 		};
 		/* append this last two */
 		new_node = node_and_memcpy(&h_new, sizeof(struct h_tmp));
@@ -126,6 +119,7 @@ tree_t* tree_from_frequencies_table(frequency_table_t t, int eos) {
 	return root;
 }
 
+/* callback to build the huffman code from the tree */
 int build_canonical_from_tree(node_t* n, unsigned int depth) {
 	if (node_is_leaf(*n)) {
 		Huffman[HuffmanIdx++] = (huffman_canon_t){
@@ -266,7 +260,7 @@ int Huffman_build_from_stream(FILE* f) {
 
 	/* build the huffman tree */
 	/* TODO: create a EOS global symbol */
-	tree_t* tree = tree_from_frequencies_table(table, 0);
+	tree_t* tree = tree_from_frequencies_table(table);
 
 	Huffman = malloc(sizeof(huffman_t)*table.length);
 	HuffmanLength = table.length - 1;
