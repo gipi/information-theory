@@ -41,6 +41,8 @@ static void usage(int exit_code) {
 int main(int argc, char* argv[]) {
 	FILE* f = stdin;
 
+	int return_status = 0;
+
 	char opt;
 	unsigned int print_canonical = 0,
 		decompress = 0;
@@ -84,6 +86,7 @@ int main(int argc, char* argv[]) {
 		/* TODO: check feof() */
 		while (size < stream_length) {
 			if(huffman_decode_one_symbol(&symbol, t, f) < 0) {
+				return_status = -1;
 				break;
 			}
 			if(fwrite(&symbol, sizeof(uint8_t), 1, stdout) < 1)
@@ -141,5 +144,5 @@ int main(int argc, char* argv[]) {
 exit:
 	free(Huffman);
 
-	return 0;
+	return return_status;
 }
