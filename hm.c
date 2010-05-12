@@ -110,15 +110,8 @@ int main(int argc, char* argv[]) {
 
 	unsigned int cycle;
 
-	if (print_canonical) {
-		for (cycle = 0 ; final[cycle].code_size ; cycle++){
-			printf("%02x\t", final[cycle].symbol);
-			printf("%u\t", final[cycle].code_size);
-			printf("%"PRIx64"\t", final[cycle].code);
-			huffman_code_print(final[cycle]);
-			printf("\n");
-		}
-	}
+	if (print_canonical)
+        huffman_print(final);
 
 
 	if (print_canonical)

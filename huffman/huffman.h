@@ -25,6 +25,7 @@ typedef struct {
 	uint64_t code;
 }huffman_t;
 
+void huffman_print(huffman_t* h);
 huffman_t* huffman(uint8_t symbol, uint8_t code_size, uint64_t code);
 
 huffman_t* Huffman_build_canonicalize_representation(void);

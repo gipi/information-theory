@@ -23,6 +23,31 @@ huffman_canon_t* Huffman = NULL;
 uint8_t HuffmanLength;
 unsigned int HuffmanIdx = 0;
 
+#define GET_NTH(b,n) (((b) & (1 << (n))) ? 1 : 0)
+
+void huffman_code_print(huffman_t row) {
+	uint8_t length = row.code_size;
+	unsigned int cycle;
+	for (cycle = 0 ; cycle < length; cycle++){
+		printf("%u", GET_NTH(row.code, length - 1 - cycle));
+	}
+}
+
+/*
+ * Print the huffman code from an array with the last element with
+ * code_size field equal to zero.
+ */
+void huffman_print(huffman_t* h) {
+	unsigned int cycle;
+	for (cycle = 0 ; h[cycle].code_size ; cycle++){
+		printf("%02x\t", h[cycle].symbol);
+		printf("%u\t", h[cycle].code_size);
+		printf("%"PRIx64"\t", h[cycle].code);
+		huffman_code_print(h[cycle]);
+		printf("\n");
+	}
+}
+
 huffman_t* huffman(uint8_t symbol, uint8_t code_size, uint64_t code) {
 	/* FIX: check pointer */
 	huffman_t* h = malloc(sizeof(huffman_t));
@@ -156,16 +181,6 @@ static void Huffman_order_by_nbits(void) {
 
 static void Huffman_order_by_symbol(void) {
 	qsort(Huffman, HuffmanLength + 1, sizeof(huffman_canon_t), cmp_huffman_symbol);
-}
-
-#define GET_NTH(b,n) (((b) & (1 << (n))) ? 1 : 0)
-
-void huffman_code_print(huffman_t row) {
-	uint8_t length = row.code_size;
-	unsigned int cycle;
-	for (cycle = 0 ; cycle < length; cycle++){
-		printf("%u", GET_NTH(row.code, length - 1 - cycle));
-	}
 }
 
 uint64_t huffman_canonicalize_step(
