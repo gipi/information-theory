@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<arpa/inet.h>
 
-#include<jpeg_header.h>
+#include<jpeg/ljpeg.h>
 
 static void read_length_and_rewind(u16int* length, FILE* f) {
 	/* first read the length */

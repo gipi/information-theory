@@ -1,5 +1,5 @@
-#ifndef __JPEG_HEADER__
-#define __JPEG_HEADER__
+#ifndef __LJPEG__
+#define __LJPEG__
 
 typedef unsigned char  u8int;
 typedef unsigned short u16int;

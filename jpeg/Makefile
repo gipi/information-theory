@@ -11,7 +11,8 @@ parse: parse.o
 test_zig_zag.o: parse.c
 	$(CC) $(CPPFLAGS) -D__TEST_ZIG_ZAG $< -c -o $@
 
-parse.o test_zig_zag.o: jpeg_header.h
+parse.o test_zig_zag.o: ljpeg.h
+
 
 clean:
 	rm -f $(ALL) *.o core
