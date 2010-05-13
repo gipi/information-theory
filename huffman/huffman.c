@@ -224,6 +224,20 @@ huffman_t* Huffman_build_canonicalize_representation(void) {
 	return hrows;
 }
 
+/* this function sets the Huffman{,Length} to predefined value */
+/* the array hc has to be nbits zero terminated */
+void Huffman_set(huffman_canon_t* hc, uint8_t length) {
+	/* first release the memory */
+	free(Huffman);
+
+	/* second allocate memory for the  maximum */
+	/* TODO: check return value of malloc() */
+	Huffman = malloc(sizeof(huffman_canon_t)*0x100);
+
+	memcpy(Huffman, hc, sizeof(huffman_canon_t) * length);
+	HuffmanLength = length - 1;
+}
+
 /* to avoid O(n^2) we can create an array so to have O(1) */
 huffman_t huffman_get_code_from_symbol(huffman_t* t, uint8_t symbol) {
 	huffman_t row;

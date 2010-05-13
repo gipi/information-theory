@@ -43,4 +43,6 @@ size_t huffman_read_symbols(int fd, huffman_t* ht, uint8_t* symbols);
 uint64_t huffman_canonicalize_step(
 	uint64_t previous_code, uint8_t previous_size, uint8_t new_size);
 
+void Huffman_set(huffman_canon_t* huffman_array, uint8_t length);
+
 #endif
