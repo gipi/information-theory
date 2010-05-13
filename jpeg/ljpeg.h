@@ -1,6 +1,8 @@
 #ifndef __LJPEG__
 #define __LJPEG__
 
+#include<huffman/huffman.h>
+
 typedef unsigned char  u8int;
 typedef unsigned short u16int;
 
@@ -55,5 +57,7 @@ struct huffman_table {
 	u8int ncodes[16];
 	u8int values[];
 }__attribute__ ((__packed__));
+
+huffman_t* huffman_from_jpeg_header(struct huffman_table);
 
 #endif

@@ -263,24 +263,8 @@ static unsigned int read_huffman_table(FILE* f) {
 	/* length (2 bytes) +
 	 * 	table class (4 bits) + table destinator (4 bits)
 	 */
-	u8int ncode = length - 3;
-	unsigned int cycle, scycle, n, idx = 0;
-	for (cycle = 0 ; cycle < 16 ; cycle++) {
-		n = ht->ncodes[cycle];
-		printf(" #codes of length %u: %u\n ", cycle + 1, n);
-		for (scycle = 0 ; scycle <  n ; scycle++) {
-			printf(" %u", ht->values[idx++]);
-		}
-		printf("\n");
-	}
-
-	unsigned int* hc = generate_code_table(generate_size_table(ht->ncodes));
-	cycle = 0;
-	printf(" code table:\n");
-	while (hc[cycle++]) {
-		printf(" %u", hc[cycle]);
-	}
-
+	huffman_t* h = huffman_from_jpeg_header(*ht);
+	huffman_print(h);
 
 	return length;
 }
