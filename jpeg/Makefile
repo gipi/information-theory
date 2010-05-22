@@ -7,9 +7,9 @@ ALL = parse test_zig_zag
 
 all: $(ALL)
 
+test_zig_zag parse: LDFLAGS=-L $(HUFFMAN_LIBRARY_PATH) -lhuffman -Wl,-rpath,$(HUFFMAN_LIBRARY_PATH)
+test_zig_zag parse: ljpeg.o
 parse: parse.o
-test_zig_zag.o: parse.c
-	$(CC) $(CPPFLAGS) -D__TEST_ZIG_ZAG $< -c -o $@
 
 parse.o test_zig_zag.o: ljpeg.h
 
