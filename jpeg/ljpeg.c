@@ -152,9 +152,7 @@ void* section_to_buffer(FILE* f) {
 	u16int length = get_section_length(f);
 	u8int* buffer = malloc(length);
 
-	int nread = fread(buffer, length, 1, f);
-	if (nread < length)/* TODO: more error checking */
-		return NULL;
+	fread_check(buffer, length - 2, f);
 
 	return buffer;
 }
