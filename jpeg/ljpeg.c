@@ -148,7 +148,7 @@ static u16int get_section_length(FILE* f) {
 
 /* allocate and full a buffer with a section content */
 /* you can cast this to a section struct */
-u8int* section_to_buffer(FILE* f) {
+void* section_to_buffer(FILE* f) {
 	u16int length = get_section_length(f);
 	u8int* buffer = malloc(length);
 
