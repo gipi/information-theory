@@ -133,11 +133,10 @@ void de_zig_zag(u8int values[], unsigned int side) {
 }
 
 static inline int fread_check(void* buffer, size_t size, FILE* stream) {
-	int nread = fread(buffer, size, 1, stream);
-	if (nread < size)/* TODO: more error checking */
-		fprintf(stderr, "warning: read %u/%u\n", nread, size);
+	if( fread(buffer, size, 1, stream) < 1 )
+		fprintf(stderr, "%s - warning: read \n",__FUNCTION__);
 
-	return nread;
+	return 0;/* FIXME*/
 }
 
 static u16int get_section_length(FILE* f) {
