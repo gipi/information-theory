@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include<stdio.h>
+#include<stdlib.h>
+#include<arpa/inet.h>
 
 #include<jpeg/ljpeg.h>
 #include<huffman/huffman.h>
@@ -129,6 +132,36 @@ void de_zig_zag(u8int values[], unsigned int side) {
 	}
 }
 
+static inline int fread_check(void* buffer, size_t size, FILE* stream) {
+	int nread = fread(buffer, size, 1, stream);
+	if (nread < size)/* TODO: more error checking */
+		fprintf(stderr, "warning: read %u/%u\n", nread, size);
+
+	return nread;
+}
+
+static u16int get_section_length(FILE* f) {
+	u16int length;
+	fread_check(&length, sizeof(length), f);
+
+	return ntohs(length);
+}
+
+/* allocate and full a buffer with a section content */
+/* you can cast this to a section struct */
+u8int* section_to_buffer(FILE* f) {
+	u16int length = get_section_length(f);
+	u8int* buffer = malloc(length);
+
+	int nread = fread(buffer, length, 1, f);
+	if (nread < length)/* TODO: more error checking */
+		return NULL;
+
+	return buffer;
+}
+
+/* we have to pass a pointer otherwise the compiler doesn't copy
+ * all the values of the values field. */
 huffman_t* huffman_from_jpeg_header(struct huffman_table* t) {
 	unsigned int nc_cycle, codeidx;
 
