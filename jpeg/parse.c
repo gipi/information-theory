@@ -34,33 +34,10 @@ static void read_length_and_rewind(u16int* length, FILE* f) {
 	}
 }
 
-static unsigned int read_JFIF(FILE* f) {
+static void handle_JFIF(FILE* f) {
 	printf(" JFIF header\n");
-	u16int length;
-	read_length_and_rewind(&length, f);
-
-	struct JFIF_header* header = malloc(length);
-	/* read all the header */
-	fread(header, length, 1, f);
-
-	if (header->identifier[0] != 'J')
-		fprintf(stderr, " warning: no JPEG\n");
-
-	u8int major = htons(header->version) >> 8;
-	u8int minor = htons(header->version) & 0xff;
-	printf(" version: %d.%d\n", major, minor);
-
-	char* units [] = {
-		"pixel aspect ratio",
-		"dots per inch",
-		"dots per cm"
-	};
-	printf(" %dx%d %s\n",
-			htons(header->xdensity),
-			htons(header->ydensity),
-			units[header->units]);
-
-	return length;
+	read_JFIF_header(f);
+	JFIF_header_print_info();
 }
 
 static unsigned int read_start_of_frame(FILE* f) {
@@ -142,7 +119,7 @@ static unsigned int handle_marker(FILE* f, unsigned char marker) {
 			delta_idx = read_huffman_table(f);
 			break;
 		case 0xe0:
-			delta_idx = read_JFIF(f);
+			handle_JFIF(f);
 			break;
 		case 0xdb:
 			delta_idx = read_quantization_table(f);

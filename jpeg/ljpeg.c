@@ -180,3 +180,28 @@ huffman_t* huffman_from_jpeg_header(struct huffman_table* t) {
 
 	return Huffman_build_canonicalize_representation();
 }
+
+struct JFIF_header* gJFIF_header = NULL;
+
+void read_JFIF_header(FILE* f) {
+	gJFIF_header = section_to_buffer(f);
+}
+
+void JFIF_header_print_info(void) {
+	if (gJFIF_header->identifier[0] != 'J')
+		fprintf(stderr, " warning: no JPEG\n");
+
+	u8int major = htons(gJFIF_header->version) >> 8;
+	u8int minor = htons(gJFIF_header->version) & 0xff;
+	printf(" version: %d.%d\n", major, minor);
+
+	char* units [] = {
+		"pixel aspect ratio",
+		"dots per inch",
+		"dots per cm"
+	};
+	printf(" %dx%d %s\n",
+			htons(gJFIF_header->xdensity),
+			htons(gJFIF_header->ydensity),
+			units[gJFIF_header->units]);
+}

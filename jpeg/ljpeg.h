@@ -29,16 +29,15 @@ typedef unsigned short u16int;
 	}while(0)
 
 struct JFIF_header {
-	u16int length;
 	char identifier[4];
 	u16int version;
 	u8int units;
-	u16int xdensity;
-	u16int ydensity;
+	u16int xdensity __attribute__ ((__packed__));
+	u16int ydensity __attribute__ ((__packed__));
 	u8int xthumb;
 	u8int ythumb;
 	u8int RGB[][3];
-}__attribute__ ((__packed__));
+};
 
 struct Nf_array {
 	u8int id;                 /* Component identifier */
@@ -75,5 +74,12 @@ struct huffman_table {
 }__attribute__ ((__packed__));
 
 huffman_t* huffman_from_jpeg_header(struct huffman_table);
+
+void JFIF_header_print_info(void);
+void read_JFIF_header(FILE* f);
+
+void read_quantization_table_header(FILE* f);
+void start_of_frame_print_info(void);
+void read_start_of_frame(FILE* f);
 
 #endif
