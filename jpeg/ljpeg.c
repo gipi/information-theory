@@ -159,7 +159,7 @@ void* section_to_buffer(FILE* f) {
 
 /* we have to pass a pointer otherwise the compiler doesn't copy
  * all the values of the values field. */
-huffman_t* huffman_from_jpeg_header(struct huffman_table* t) {
+huffman_t* huffman_from_jpeg_header(struct ljpeg_huffman_table* t) {
 	unsigned int nc_cycle, codeidx;
 
 	huffman_canon_t hc[0x100];
@@ -242,5 +242,42 @@ void start_of_frame_print_info(void) {
 				nfa.hv_sampling_factor >> 4,
 				nfa.quant_table_number);
 	}
+}
 
+struct ljpeg_huffman_table* g_ljpeg_ht = NULL;
+huffman_t* g_huffman_y_dc = NULL;
+huffman_t* g_huffman_y_ac = NULL;
+huffman_t* g_huffman_cbcr_dc = NULL;
+huffman_t* g_huffman_cbcr_ac = NULL;
+
+static void ljpeg_parse_huffman_table(void) {
+	huffman_t* hm = huffman_from_jpeg_header(g_ljpeg_ht);
+
+	if (g_ljpeg_ht->matrix_type) { /* AC */
+	       if (g_ljpeg_ht->identifier) {/* CbCr */
+		       g_huffman_cbcr_ac = hm;
+	       } else {/* Y */
+		       g_huffman_y_ac = hm;
+	       }
+	} else {/* DC */
+	       if (g_ljpeg_ht->identifier) {/* CbCr */
+		       g_huffman_cbcr_dc = hm;
+	       } else {/* Y */
+		       g_huffman_y_dc = hm;
+	       }
+	}
+}
+
+void read_huffman_table(FILE* f) {
+	g_ljpeg_ht = section_to_buffer(f);
+	ljpeg_parse_huffman_table();
+	free(g_ljpeg_ht);
+	g_ljpeg_ht = NULL;
+}
+
+void ljpeg_print_huffman_tables(void) {
+	huffman_print(g_huffman_y_dc);
+	huffman_print(g_huffman_y_ac);
+	huffman_print(g_huffman_cbcr_dc);
+	huffman_print(g_huffman_cbcr_ac);
 }

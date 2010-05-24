@@ -63,15 +63,22 @@ struct quantization_table {
 	struct quantization quantization[1];
 };
 
-struct huffman_table {
-	u16int length;
-	u8int matrix_type:4;
-	u8int identifier:4;
+/*
+ * If you have to pass as argument this struct and you want
+ * to access correctly the values field, you have to pass a
+ * pointer to it.
+ */
+struct ljpeg_huffman_table {/* maybe change the prefix in ljpeg_ */
+	u8int identifier:4;   /* high bit */
+	u8int matrix_type:4;  /* low bit  */
 	u8int ncodes[16];
-	u8int values[];
-}__attribute__ ((__packed__));
+	/* this MUST be defined like that otherwise the compiler creates
+	 * a pointer and when passed to another function the values
+	 * are screwed up */
+	u8int values[1];/* symbols */
+};
 
-huffman_t* huffman_from_jpeg_header(struct huffman_table);
+huffman_t* huffman_from_jpeg_header(struct ljpeg_huffman_table*);
 
 void JFIF_header_print_info(void);
 void read_JFIF_header(FILE* f);
@@ -80,5 +87,8 @@ void read_quantization_table_header(FILE* f);
 
 void start_of_frame_print_info(void);
 void read_start_of_frame(FILE* f);
+
+void read_huffman_table(FILE* f);
+void ljpeg_print_huffman_tables(void);
 
 #endif

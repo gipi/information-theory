@@ -80,7 +80,7 @@ static unsigned int handle_marker(FILE* f, unsigned char marker) {
 			handle_start_of_frame(f);
 			break;
 		case 0xc4:
-			delta_idx = read_huffman_table(f);
+			handle_huffman_table(f);
 			break;
 		case 0xe0:
 			handle_JFIF(f);
