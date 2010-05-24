@@ -216,3 +216,31 @@ void quantization_table_print_info(void) {
 	create_zig_zag(8);
 	de_zig_zag(gquantization_table->quantization[0].value, 8);
 }
+
+struct start_of_frame* gstart_of_frame = NULL;
+
+void read_start_of_frame(FILE* f) {
+	gstart_of_frame = section_to_buffer(f);
+}
+
+void start_of_frame_print_info(void) {
+	printf(" %ux%u samples with precision %u bytes and %u components\n",
+			htons(gstart_of_frame->X),
+			htons(gstart_of_frame->Y),
+			gstart_of_frame->sample,
+			gstart_of_frame->Nf);
+
+	unsigned int cycle;
+	printf( " SUBSAMPLING\n");
+	for (cycle = 0 ; cycle < gstart_of_frame->Nf ; cycle++ ) {
+		struct Nf_array nfa = gstart_of_frame->nf_array[cycle];
+		printf( " id: %u\n"
+			" HV sampling %hd:%hd\n"
+			" Quant. table id %u\n\n",
+				nfa.id,
+				nfa.hv_sampling_factor & 15,
+				nfa.hv_sampling_factor >> 4,
+				nfa.quant_table_number);
+	}
+
+}

@@ -46,7 +46,6 @@ struct Nf_array {
 };
 
 struct start_of_frame{
-	u16int length;
 	u8int sample; /* Sample precision */
 	u16int Y;     /* Number of lines */
 	u16int X;     /* Number of samples per line */
@@ -78,6 +77,7 @@ void JFIF_header_print_info(void);
 void read_JFIF_header(FILE* f);
 
 void read_quantization_table_header(FILE* f);
+
 void start_of_frame_print_info(void);
 void read_start_of_frame(FILE* f);
 

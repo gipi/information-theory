@@ -40,35 +40,8 @@ static void handle_JFIF(FILE* f) {
 	JFIF_header_print_info();
 }
 
-static unsigned int read_start_of_frame(FILE* f) {
-	u16int length;
-	read_length_and_rewind(&length, f);
-
-	/* allocate start of frame */
-	struct start_of_frame* sof =
-		malloc(length);
-
-	/* read all the frame */
-	fread(sof, length, 1, f);
-
-	printf(" length: %u\n", htons(sof->length));
-	printf(" %ux%u samples with precision %u bytes and %u components\n",
-			htons(sof->X), htons(sof->Y), sof->sample, sof->Nf);
-
-	unsigned int cycle;
-	printf( " SUBSAMPLING\n");
-	for (cycle = 0 ; cycle < sof->Nf ; cycle++ ) {
-		struct Nf_array nfa = sof->nf_array[cycle];
-		printf( " id: %u\n"
-			" HV sampling %hd:%hd\n"
-			" Quant. table id %u\n\n",
-				nfa.id,
-				nfa.hv_sampling_factor & 15,
-				nfa.hv_sampling_factor >> 4,
-				nfa.quant_table_number);
-	}
-
-	return length;
+static void handle_start_of_frame(FILE* f) {
+	read_start_of_frame(f);
 }
 
 static void handle_quantization_table(FILE* f) {
@@ -104,7 +77,7 @@ static unsigned int handle_marker(FILE* f, unsigned char marker) {
 	unsigned int delta_idx = 0;
 	switch (marker) {
 		case 0xc0:
-			delta_idx = read_start_of_frame(f);
+			handle_start_of_frame(f);
 			break;
 		case 0xc4:
 			delta_idx = read_huffman_table(f);
