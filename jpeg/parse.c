@@ -39,9 +39,7 @@ static void usage(int exit_code) {
 }
 
 static void handle_JFIF(FILE* f) {
-	printf(" JFIF header\n");
 	read_JFIF_header(f);
-	JFIF_header_print_info();
 }
 
 static void handle_start_of_frame(FILE* f) {
@@ -49,10 +47,7 @@ static void handle_start_of_frame(FILE* f) {
 }
 
 static void handle_quantization_table(FILE* f) {
-	printf(" QUANTIZATION TABLE\n");
 	read_quantization_table_header(f);
-	quantization_table_print_info();
-
 }
 
 static unsigned int read_huffman_table(FILE* f) {
