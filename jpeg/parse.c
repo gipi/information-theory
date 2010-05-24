@@ -16,9 +16,27 @@
  */
 #include<stdio.h>
 #include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
 #include<arpa/inet.h>
+#include<errno.h>
 
 #include<jpeg/ljpeg.h>
+
+#define USAGE_STR \
+	"usage: parse [options] <jpeg file>\n" \
+	"\n" \
+	"options:\n" \
+	"\n" \
+	"  -h\tprint this message\n" \
+	"  -q\tquantization table\n" \
+	"  -H\thuffman tables\n"     \
+	"  -s\tscan data\n"
+
+static void usage(int exit_code) {
+	printf(USAGE_STR);
+	exit(exit_code);
+}
 
 static void handle_JFIF(FILE* f) {
 	printf(" JFIF header\n");
@@ -81,20 +99,32 @@ static unsigned int handle_marker(FILE* f, unsigned char marker) {
 
 
 int main(int argc, char* argv[]){
-	if (argc < 2) {
-		fprintf(stderr, "usage: %s <jpeg file>\n", argv[0]);
-		exit(1);
+	char C;
+	int show_quantization_table = 0;
+	int show_huffman_table = 0;
+
+	while ( (C = getopt(argc, argv, "hqHs")) != -1) {
+		switch (C) {
+			case 'h':
+				usage(0);
+				break;
+			case 'H':
+				show_huffman_table = 1;
+				break;
+			case 'q':
+				show_quantization_table = 1;
+				break;
+		}
 	}
 
-	FILE* fjpeg;
-	if (!strcmp(argv[1], "-"))
-		fjpeg = stdin;
-	else
-		fjpeg = fopen(argv[1], "r");
-
-	if (!fjpeg) {
-		perror("fatal opening jpeg file");
-		exit(1);
+	FILE* fjpeg = stdin;
+	if (optind < argc) {
+		char* filename = argv[optind];
+		fjpeg = fopen(argv[optind], "r");
+		if (!fjpeg) {
+			fprintf(stderr, "fatal opening '%s': %s\n", filename, strerror(errno));
+			usage(1);
+		}
 	}
 
 	unsigned char c;
