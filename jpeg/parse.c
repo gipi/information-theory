@@ -20,20 +20,6 @@
 
 #include<jpeg/ljpeg.h>
 
-static void read_length_and_rewind(u16int* length, FILE* f) {
-	/* first read the length */
-	fread(length, sizeof(*length), 1, f);
-
-	/* data with most significant bit first */
-	*length = htons(*length);
-
-	/* rewind a little bit */
-	fseek(f, -sizeof(*length), SEEK_CUR);
-	if(ferror(f))
-		perror("fseek");
-	}
-}
-
 static void handle_JFIF(FILE* f) {
 	printf(" JFIF header\n");
 	read_JFIF_header(f);
