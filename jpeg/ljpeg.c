@@ -205,3 +205,14 @@ void JFIF_header_print_info(void) {
 			htons(gJFIF_header->ydensity),
 			units[gJFIF_header->units]);
 }
+
+struct quantization_table* gquantization_table = NULL;
+
+void read_quantization_table_header(FILE* f) {
+	gquantization_table = section_to_buffer(f);
+}
+
+void quantization_table_print_info(void) {
+	create_zig_zag(8);
+	de_zig_zag(gquantization_table->quantization[0].value, 8);
+}

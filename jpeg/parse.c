@@ -71,20 +71,11 @@ static unsigned int read_start_of_frame(FILE* f) {
 	return length;
 }
 
-static unsigned int read_quantization_table(FILE* f) {
-	u16int length;
-	read_length_and_rewind(&length, f);
+static void handle_quantization_table(FILE* f) {
+	printf(" QUANTIZATION TABLE\n");
+	read_quantization_table_header(f);
+	quantization_table_print_info();
 
-	printf(" QUANTIZATION TABLE (length: %u)\n", length);
-
-	struct quantization_table* qt = malloc(length);
-
-	fread(qt, length, 1, f);
-
-	create_zig_zag(8);
-	de_zig_zag(qt->quantization[0].value, 8);
-
-	return length;
 }
 
 static unsigned int read_huffman_table(FILE* f) {
@@ -122,7 +113,7 @@ static unsigned int handle_marker(FILE* f, unsigned char marker) {
 			handle_JFIF(f);
 			break;
 		case 0xdb:
-			delta_idx = read_quantization_table(f);
+			handle_quantization_table(f);
 			break;
 	}
 

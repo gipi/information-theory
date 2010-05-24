@@ -61,9 +61,8 @@ struct quantization {
 };
 
 struct quantization_table {
-	u16int length;
-	struct quantization quantization[];
-}__attribute__ ((__packed__));
+	struct quantization quantization[1];
+};
 
 struct huffman_table {
 	u16int length;
