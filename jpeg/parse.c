@@ -50,26 +50,13 @@ static void handle_quantization_table(FILE* f) {
 	read_quantization_table_header(f);
 }
 
-static unsigned int read_huffman_table(FILE* f) {
-	u16int length;
-	read_length_and_rewind(&length, f);
+static void handle_huffman_table(FILE* f) {
+	read_huffman_table(f);
+}
 
-	struct huffman_table* ht = malloc(length);
 
-	fread(ht, length, 1, f);
 
-	printf(" HUFFMAN TABLE (length: %u)\n", length);
-	printf(" matrix type: %d\n", ht->matrix_type);
-	printf(" identifier: %d\n", ht->identifier);
-
-	/* here goes the code definition */
-	/* length (2 bytes) +
-	 * 	table class (4 bits) + table destinator (4 bits)
 	 */
-	huffman_t* h = huffman_from_jpeg_header(*ht);
-	huffman_print(h);
-
-	return length;
 }
 
 static unsigned int handle_marker(FILE* f, unsigned char marker) {
