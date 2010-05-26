@@ -254,17 +254,17 @@ static void ljpeg_parse_huffman_table(void) {
 	huffman_t* hm = huffman_from_jpeg_header(g_ljpeg_ht);
 
 	if (g_ljpeg_ht->matrix_type) { /* AC */
-	       if (g_ljpeg_ht->identifier) {/* CbCr */
-		       g_huffman_cbcr_ac = hm;
-	       } else {/* Y */
-		       g_huffman_y_ac = hm;
-	       }
+		if (g_ljpeg_ht->identifier) {/* CbCr */
+			g_huffman_cbcr_ac = hm;
+		} else {/* Y */
+			g_huffman_y_ac = hm;
+		}
 	} else {/* DC */
-	       if (g_ljpeg_ht->identifier) {/* CbCr */
-		       g_huffman_cbcr_dc = hm;
-	       } else {/* Y */
-		       g_huffman_y_dc = hm;
-	       }
+		if (g_ljpeg_ht->identifier) {/* CbCr */
+			g_huffman_cbcr_dc = hm;
+		} else {/* Y */
+			g_huffman_y_dc = hm;
+		}
 	}
 }
 
