@@ -78,6 +78,13 @@ struct ljpeg_huffman_table {/* maybe change the prefix in ljpeg_ */
 	u8int values[1];/* symbols */
 };
 
+struct start_of_scan {
+	u16int length;
+	u8int ncomponents;
+	u16int* components __attribute__ ((__packed__));
+	u8int* data;
+};
+
 huffman_t* huffman_from_jpeg_header(struct ljpeg_huffman_table*);
 
 void JFIF_header_print_info(void);
@@ -90,5 +97,7 @@ void read_start_of_frame(FILE* f);
 
 void read_huffman_table(FILE* f);
 void ljpeg_print_huffman_tables(void);
+
+void ljpeg_read_scan_data(FILE* f);
 
 #endif

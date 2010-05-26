@@ -56,6 +56,11 @@ static void handle_huffman_table(FILE* f) {
 
 
 
+unsigned handle_scan_data(FILE* f) {
+	ljpeg_read_scan_data(f);
+	/* 
+	 * TODO: create an auxiliary function
+	 * able to save a section in a buffer
 	 */
 }
 
@@ -71,6 +76,9 @@ static unsigned int handle_marker(FILE* f, unsigned char marker) {
 		case 0xe0:
 			handle_JFIF(f);
 			break;
+		case 0xda:
+			handle_scan_data(f);
+			break;
 		case 0xdb:
 			handle_quantization_table(f);
 			break;
@@ -84,6 +92,7 @@ int main(int argc, char* argv[]){
 	char C;
 	int show_quantization_table = 0;
 	int show_huffman_table = 0;
+	int show_data = 0;
 
 	while ( (C = getopt(argc, argv, "hqHs")) != -1) {
 		switch (C) {
@@ -96,6 +105,8 @@ int main(int argc, char* argv[]){
 			case 'q':
 				show_quantization_table = 1;
 				break;
+			case 's':
+				show_data = 1;
 		}
 	}
 

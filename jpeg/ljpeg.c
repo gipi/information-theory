@@ -281,3 +281,46 @@ void ljpeg_print_huffman_tables(void) {
 	huffman_print(g_huffman_cbcr_dc);
 	huffman_print(g_huffman_cbcr_ac);
 }
+
+
+struct start_of_scan g_start_of_scan;
+
+void ljpeg_read_scan_data(FILE* f) {
+	fread(&g_start_of_scan.length, sizeof(u16int), 1, f);
+	g_start_of_scan.length = htons(g_start_of_scan.length);
+	fread(&g_start_of_scan.ncomponents, sizeof(u8int), 1, f);
+
+	g_start_of_scan.components =
+		malloc(sizeof(u16int)*g_start_of_scan.ncomponents);
+	fread(g_start_of_scan.components,
+		sizeof(u16int), g_start_of_scan.ncomponents, f);
+
+	/* 3 useless bytes */
+	fseek(f, 3, SEEK_CUR);/* 00 3F 00 ?*/
+
+	g_start_of_scan.data = malloc(1024);
+
+	unsigned char c;
+	unsigned int idx = 0;
+	while (1) {
+		c = fgetc(f);
+		switch (c) {
+			case 0xff:
+				c = fgetc(f);
+				if (c != 0x00)
+					goto exit;
+				c = 0xff;
+			default:
+				//printf(" %02x ", c);printf_byte(c);
+				g_start_of_scan.data[idx++] = c;
+
+		}
+	}
+
+exit:
+	/* if exits then the last thing read is 0xff 0xXY */
+	fseek(f, -2, SEEK_CUR);
+}
+
+void print_scan_data(void) {
+}
