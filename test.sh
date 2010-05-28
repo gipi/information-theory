@@ -3,8 +3,6 @@
 
 . test-lib.sh
 
-exec 2>.test.log
-
 [[ -f hm ]] || die "hm not found"
 [[ -f fbits ]] || die "fbits not found"
 

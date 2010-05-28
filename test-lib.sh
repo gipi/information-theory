@@ -1,3 +1,5 @@
+exec 2>.test.log
+
 bold() {
 	echo -en '\e[1m'"$1"'\e[0m'
 }
