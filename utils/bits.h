@@ -42,4 +42,35 @@ size_t fread_bits(uint64_t* value, uint8_t length, int advance, FILE* f);
 void write_bits(uint8_t* buffer, uint64_t bits, uint8_t length);
 uint64_t read_bits(uint8_t* buffer, uint8_t length, int advance);
 
+
+enum io_type_t{
+	XIO_TYPE_BUFFER,
+	XIO_TYPE_STREAM
+};
+
+struct Buffer{
+	enum io_type_t type;
+	uint8_t* data;
+	size_t bytes_idx;
+	/* bit position in the byte (0 = msb, 7 = lsb) */
+	uint8_t bits_idx;
+};
+
+struct Stream{
+	enum io_type_t type;
+	uint8_t* data;
+	/* bit position in the byte (0 = msb, 7 = lsb) */
+	uint8_t bits_idx;
+	long seek;
+	FILE* file;
+};
+
+/* look definition of XEvent to understand this */
+typedef union _xio_t{
+	enum io_type_t type;
+	struct Buffer buffer;
+	struct Stream stream;
+}xio_t;
+size_t readbits(uint64_t* value, uint8_t length, int advance, xio_t* xio);
+
 #endif

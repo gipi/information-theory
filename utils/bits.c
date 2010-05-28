@@ -206,3 +206,150 @@ size_t fread_bits(uint64_t* value, uint8_t length, int advance, FILE* f) {
 
 	return status;
 }
+
+static uint64_t _xio_readinternalbytevalue(xio_t xio) {
+	uint64_t value;
+	switch (xio.type) {
+		case XIO_TYPE_BUFFER:
+			value = xio.buffer.data[xio.buffer.bytes_idx];
+			break;
+		case XIO_TYPE_STREAM:
+			/* TODO: some check */
+			fseek(xio.stream.file, xio.stream.seek, SEEK_SET);
+			fread(&value, sizeof(value),1, xio.stream.file);
+			break;
+	}
+
+	return value;
+}
+
+static uint8_t _xio_get_nbits_available(xio_t xio) {
+	uint8_t nbitsavailable = 0;
+	switch (xio.type) {
+		case XIO_TYPE_BUFFER:
+			nbitsavailable = 8 - xio.buffer.bits_idx;
+			break;
+		case XIO_TYPE_STREAM:
+			break;
+	}
+
+	return nbitsavailable;
+}
+
+/* update the internal index to the next byte */
+static void _xio_next(xio_t* xio) {
+	switch (xio->type) {
+		case XIO_TYPE_BUFFER:
+			xio->buffer.bytes_idx++;
+			xio->buffer.bits_idx = 0;
+			break;
+		case XIO_TYPE_STREAM:
+			xio->stream.seek++;
+			xio->stream.bits_idx = 0;
+			break;
+	}
+}
+
+static void _xio_update_bits_idx(xio_t* xio, int delta) {
+	switch (xio->type) {
+		case XIO_TYPE_BUFFER:
+			xio->buffer.bits_idx += delta;
+			break;
+		case XIO_TYPE_STREAM:
+			xio->stream.bits_idx += delta;
+			break;
+	}
+}
+
+/* create a mask starting from bits_idx to delta bits*/
+uint64_t _xio_mask(xio_t xio, uint8_t delta) {
+	/* the start position is always bits_idx */
+	uint8_t start;
+	switch (xio.type) {
+		case XIO_TYPE_BUFFER:
+			start = xio.buffer.bits_idx;
+			break;
+		case XIO_TYPE_STREAM:
+			start = xio.stream.bits_idx;
+			break;
+	}
+
+	uint64_t mask = 0;
+	unsigned int cycle;
+	for (cycle = 0 ; cycle < delta; cycle++){
+		mask |= (1 << (8 - start - cycle - 1));
+	}
+
+	return mask;
+}
+
+size_t readbits(uint64_t* value, uint8_t length, int advance, xio_t* xio) {
+	static uint8_t status = 0;
+	xio_t old_xio = *xio;
+
+	uint8_t nbits_available = _xio_get_nbits_available(*xio);
+	uint64_t the_mask = 0;
+
+	if (length > nbits_available) {
+		/* read recursevely */
+		the_mask = _xio_mask(*xio, nbits_available);
+		*value = _xio_readinternalbytevalue(*xio) & the_mask;
+
+		/* adjust value */
+		*value <<= length - nbits_available;
+
+		/* update the internal file position */
+		_xio_next(xio);
+
+		/* read remaining bits */
+		uint64_t new_value;
+		/* advance index */
+		status = readbits(&new_value,
+			length - nbits_available, advance, xio);
+		*value |= new_value;
+	} else {
+		the_mask = _xio_mask(*xio, length);
+		*value = _xio_readinternalbytevalue(*xio) & the_mask;
+		*value >>= (nbits_available - length);
+		_xio_update_bits_idx(xio, length);
+	}
+
+	/* */
+	if (!advance)
+		*xio = old_xio;
+
+	return status;
+}
+
+#ifdef __TEST__
+
+int main(int argc, char* argv[]) {
+	if (argc > 1 && argv[1][0] == '-' && argv[1][1] == 'h') {
+		printf("usage: %s [<nbits1> ... ]\n", argv[0]);
+		exit(0);
+	}
+
+	uint8_t buffer[1024];
+	size_t totalread = 0;
+	while (!feof(stdin)) {
+		totalread +=
+			fread(buffer + totalread, 1, 1024 - totalread, stdin);
+	}
+
+	uint64_t value = 0;
+	xio_t xio;
+	xio.buffer = (struct Buffer){
+		.type = XIO_TYPE_BUFFER,
+		.data = buffer
+	};
+
+	unsigned int cycle = 0;
+	for (cycle = 1 ; cycle < argc ; cycle++) {
+		readbits(&value, atoi(argv[cycle]), 1, &xio);
+		printf_byte(value);
+		printf(" ");
+	}
+
+	return 0;
+}
+#endif /* __TEST__ */

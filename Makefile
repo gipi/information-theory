@@ -2,13 +2,19 @@ CPPFLAGS = -I. -Wall -g
 
 SRC=$(wildcard *.c *.h)
 
-BIN = occurence hm fbits test-tree
+BIN = occurence hm
+TEST = test-tree fbits test-bits
+DIRS = jpeg
 LIB = libhuffman.so
 
-all = $(BIN) $(LIB) tags
+ALL = $(BIN) $(LIB) $(TEST) tags
+
+all: $(ALL)
 
 data_structure/tree.o: data_structure/tree.h
+
 test-tree: data_structure/tree.c
+test-bits: utils/bits.c
 	$(CC) $(CPPFLAGS) -D__TEST__ $< -o $@
 
 frequency.o: frequency.h
@@ -29,6 +35,8 @@ utils/bits.o: utils/bits.h
 fbits: fbits.o utils/bits.o
 fbits.o: utils/bits.h
 
+bits-test: utils/bits.o
+
 occurence.o: frequency.h
 occurence: occurence.o frequency.o
 
@@ -36,5 +44,5 @@ tags: $(SRC)
 	ctags -R *
 
 clean:
-	rm -f core $(BIN)
+	rm -f core $(ALL)
 	find . -iname '*.o' -delete
