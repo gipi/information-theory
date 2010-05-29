@@ -374,3 +374,35 @@ static int huffman_look_for_code(
 int huffman_decode_one_symbol(uint8_t* symbol, huffman_t* t, FILE* f) {
 	return huffman_look_for_code(symbol, t, f);
 }
+
+int huffman_look_for_code_from_xio(uint8_t* symbol, huffman_t* t, xio_t* xio) {
+	unsigned int cycle, status = 0;
+	uint64_t value = 0;
+	uint8_t old_code_size = 0;
+	huffman_t row;
+	for (cycle = 0 ; t[cycle].code_size ; cycle++) {
+		row = t[cycle];
+
+		/* is useless to re-read the value*/
+		if (row.code_size != old_code_size) {
+			old_code_size = row.code_size;
+			status = readbits(&value, row.code_size, 0, xio);
+		}
+
+		if(status == -1)
+			return status;
+
+		if (value != row.code)
+			continue;
+
+		readbits(&value, row.code_size, 1, xio);
+
+		*symbol = row.symbol;
+
+		return 0;
+	}
+
+	fprintf(stderr, "fatal: code not found\n");
+
+	return -1;
+}
