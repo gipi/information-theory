@@ -1,8 +1,10 @@
 #ifndef __HUFFMAN_H__
 #define __HUFFMAN_H__
 
+#include<stdio.h>
 #include<stdint.h>
 #include<stddef.h>
+#include<utils/bits.h>
 
 
 typedef struct {

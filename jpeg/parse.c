@@ -22,6 +22,7 @@
 #include<errno.h>
 
 #include<jpeg/ljpeg.h>
+#include<utils/bits.h>
 
 #define USAGE_STR \
 	"usage: parse [options] <jpeg file>\n" \
