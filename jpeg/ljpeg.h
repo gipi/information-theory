@@ -19,10 +19,9 @@
 
 #include<huffman/huffman.h>
 
-#define one_more_byte(c,f,idx) \
+#define one_more_byte(c,f) \
 	do{\
 		c = fgetc(f);\
-		(idx)++;\
 	}while(0)
 
 struct JFIF_header {

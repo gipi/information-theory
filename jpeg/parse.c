@@ -122,29 +122,20 @@ int main(int argc, char* argv[]){
 	}
 
 	unsigned char c;
-	unsigned int idx = -1, col = 0, delta = 0;
 
 	/* it's a binary file so checking for EOF in fgetc() is useless */
 	while (1) {
-		one_more_byte(c, fjpeg, idx);
+		one_more_byte(c, fjpeg);
 		if (feof(fjpeg))
 			break;
 
 		if (c == 0xff) {
-			if(idx)
-				printf("\n\n");
-
-			one_more_byte(c, fjpeg, idx);
-			printf("0xff%02x at %u", c, idx - 1);
-			delta = handle_marker(fjpeg, c);
-			col = 0;
+			one_more_byte(c, fjpeg);
+			/* TODO: create a struct where insert
+			 * the marker position*/
+			handle_marker(fjpeg, c);
 		}else{
-
-			if (!(col % 20))
-				printf("\n");
-
 			printf(" %02x", c);
-			col++;
 		}
 	}
 
