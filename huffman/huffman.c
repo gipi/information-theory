@@ -402,7 +402,6 @@ int huffman_look_for_code_from_xio(uint8_t* symbol, huffman_t* t, xio_t* xio) {
 		return 0;
 	}
 
-	fprintf(stderr, "fatal: code not found\n");
 
 	return -1;
 }
