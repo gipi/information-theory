@@ -342,6 +342,15 @@ exit:
 	fseek(f, -2, SEEK_CUR);
 }
 
+/* free all the memory busy for the data structure */
+void ljpeg_free(void) {
+	free(g_start_of_scan.data);
+	free(g_start_of_scan.components);
+
+	free(gquantization_table[0]);
+	free(gquantization_table[1]);
+}
+
 static int16_t value_from_category_code(uint64_t cc, uint16_t size) {
 	/*
 	 * the category code is like a two's complement:

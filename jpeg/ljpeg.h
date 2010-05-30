@@ -107,4 +107,6 @@ void ljpeg_print_huffman_tables(void);
 void ljpeg_read_scan_data(FILE* f);
 void ljpeg_print_scan_data(void);
 
+void ljpeg_free(void);
+
 #endif
