@@ -55,9 +55,9 @@ static void handle_huffman_table(FILE* f) {
 	read_huffman_table(f);
 }
 
+static void handle_scan_data(FILE* f) {
 
 
-unsigned handle_scan_data(FILE* f) {
 	ljpeg_read_scan_data(f);
 	/* 
 	 * TODO: create an auxiliary function

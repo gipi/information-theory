@@ -303,6 +303,7 @@ void ljpeg_print_huffman_tables(void) {
 
 
 struct start_of_scan g_start_of_scan;
+size_t g_scan_data_size;
 
 void ljpeg_read_scan_data(FILE* f) {
 	fread(&g_start_of_scan.length, sizeof(uint16_t), 1, f);
@@ -317,10 +318,11 @@ void ljpeg_read_scan_data(FILE* f) {
 	/* 3 useless bytes */
 	fseek(f, 3, SEEK_CUR);/* 00 3F 00 ?*/
 
-	g_start_of_scan.data = malloc(1024);
+	/* TODO: check for size */
+	g_start_of_scan.data = malloc(1024*1024);
 
 	unsigned char c;
-	unsigned int idx = 0;
+	g_scan_data_size = 0;
 	while (1) {
 		c = fgetc(f);
 		switch (c) {
@@ -331,8 +333,7 @@ void ljpeg_read_scan_data(FILE* f) {
 				c = 0xff;
 			default:
 				//printf(" %02x ", c);printf_byte(c);
-				g_start_of_scan.data[idx++] = c;
-
+				g_start_of_scan.data[g_scan_data_size++] = c;
 		}
 	}
 
@@ -341,5 +342,123 @@ exit:
 	fseek(f, -2, SEEK_CUR);
 }
 
-void print_scan_data(void) {
+static int16_t value_from_category_code(uint64_t cc, uint16_t size) {
+	/*
+	 * the category code is like a two's complement:
+	 * the first bit is the sign
+	 * 	0 -> -
+	 * 	1 -> +
+	 */
+	if (!size)
+		return 0;
+
+	/* cc              = 00101 */
+	/* the_mask        = */
+	/*  return value   = 11010 */
+	uint64_t the_mask = create_complementary_mask(size);
+
+	return NTH(cc, size - 1) ? cc : -~(cc|the_mask);
+}
+
+static int16_t* _ljpeg_dump_block(xio_t* xio, huffman_t* htable_dc, huffman_t* htable_ac) {
+	int16_t* matrix, value;
+
+
+	/* DC stuffs */
+	uint8_t dc_nbits = 0;
+	int status = huffman_look_for_code_from_xio(
+		&dc_nbits, htable_dc, xio);
+
+	if (status < 0) /* not code found so I think there isn't more data */
+		return NULL;
+
+	matrix = calloc(64, sizeof(int16_t));
+
+	uint64_t dc_component;
+	readbits(&dc_component, dc_nbits, 1, xio);
+	value = value_from_category_code(dc_component, dc_nbits);
+	printf(" [%d, %"PRIu64"] %d ", dc_nbits, dc_component, value);
+
+	matrix[0] = value;
+
+	unsigned int idx = 0;
+	uint8_t ac_code = 1, zlc, category_bits;
+	uint64_t ac;
+	while (idx < 63) {
+		/* AC stuffs */
+		status = huffman_look_for_code_from_xio(
+			&ac_code, htable_ac, xio);
+		if (status < 0)
+			return NULL;
+
+		zlc = (ac_code & 0xf0) >> 4;
+		category_bits = ac_code & 0x0f;
+		readbits(&ac, category_bits, 1, xio);
+		value = value_from_category_code(ac, category_bits);
+
+		idx += zlc + 1;
+
+		printf(" %d=(%d, %d) %d ",
+			ac_code, zlc, category_bits, value);
+
+		if (ac_code == 0)
+			break;
+		if (idx > 64)
+			fprintf(stderr, "fatal: more than 64 component\n");
+
+		/* REMEMBER: array are 0-indexed */
+		matrix[idx] = value;
+	}
+
+	return matrix;
+}
+
+void ljpeg_print_scan_data(void) {
+	unsigned int cycle;
+	for (cycle = 0 ; cycle < g_scan_data_size ; cycle++) {
+		printf_byte(g_start_of_scan.data[cycle]);
+	}
+	puts("");
+
+	/* first DC */
+	xio_t xio;
+	xio.buffer = (struct Buffer) {
+		.type = XIO_TYPE_BUFFER,
+		.data = g_start_of_scan.data
+	};
+
+	create_zig_zag(8);
+
+	int nblocks =
+		(ntohs(gstart_of_frame->Y)/8)*(ntohs(gstart_of_frame->X)/8);
+
+	printf("DUMPING OF %d block(s)\n", nblocks);
+
+	int16_t* matrix = NULL;
+	/* FIXME: works only for 1:1:1 subsampling */
+	while (nblocks--) {
+		matrix = _ljpeg_dump_block(&xio, g_huffman_y_dc, g_huffman_y_ac);
+		if (!matrix)/* TODO: more verbose output */
+			break;
+
+		puts("");
+		de_zig_zag(matrix, 8);
+		free(matrix);
+
+		matrix = _ljpeg_dump_block(&xio, g_huffman_cbcr_dc, g_huffman_cbcr_ac);
+		if (!matrix)
+			break;
+
+		puts("");
+		de_zig_zag(matrix, 8);
+		free(matrix);
+
+		matrix = _ljpeg_dump_block(&xio, g_huffman_cbcr_dc, g_huffman_cbcr_ac);
+		if (!matrix)
+			break;
+
+		puts("");
+		de_zig_zag(matrix, 8);
+		free(matrix);
+	}
 }
