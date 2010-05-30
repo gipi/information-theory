@@ -4,12 +4,16 @@ SRC=$(wildcard *.c *.h)
 
 BIN = occurence hm
 TEST = test-tree fbits test-bits
-DIRS = jpeg
+
+# order is important
+DIRS = huffman jpeg
 LIB = libhuffman.so
+
+VPATH = $(DIRS)
 
 ALL = $(BIN) $(LIB) $(TEST) tags
 
-all: $(ALL)
+all: $(ALL) $(DIRS)
 
 data_structure/tree.o: data_structure/tree.h
 
@@ -40,9 +44,15 @@ bits-test: utils/bits.o
 occurence.o: frequency.h
 occurence: occurence.o frequency.o
 
+.PHONY: $(DIRS)
+
+$(DIRS):
+	$(MAKE) -C $@ VPATH=$(CURDIR)
+
 tags: $(SRC)
 	ctags -R *
 
 clean:
 	rm -f core $(ALL)
 	find . -iname '*.o' -delete
+	for i in $(DIRS); do $(MAKE) -C $$i clean; done
