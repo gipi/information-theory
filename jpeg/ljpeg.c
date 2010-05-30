@@ -217,15 +217,19 @@ void JFIF_header_print_info(void) {
 			units[gJFIF_header->units]);
 }
 
-struct quantization_table* gquantization_table = NULL;
+struct quantization_table* gquantization_table[2];
 
 void read_quantization_table_header(FILE* f) {
-	gquantization_table = section_to_buffer(f);
+	static int idx = 0;
+	gquantization_table[idx++] = section_to_buffer(f);
 }
 
 void quantization_table_print_info(void) {
 	create_zig_zag(8);
-	de_zig_zag(gquantization_table->quantization[0].value, 8);
+	printf("FIRST QUANTIZATION TABLE\n");
+	ude_zig_zag(gquantization_table[0]->quantization[0].value, 8);
+	printf("SECOND QUANTIZATION TABLE\n");
+	ude_zig_zag(gquantization_table[1]->quantization[0].value, 8);
 }
 
 struct start_of_frame* gstart_of_frame = NULL;

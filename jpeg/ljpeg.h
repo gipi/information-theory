@@ -91,6 +91,7 @@ void JFIF_header_print_info(void);
 void read_JFIF_header(FILE* f);
 
 void read_quantization_table_header(FILE* f);
+void quantization_table_print_info(void);
 
 void start_of_frame_print_info(void);
 void read_start_of_frame(FILE* f);
