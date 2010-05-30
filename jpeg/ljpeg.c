@@ -121,11 +121,22 @@ static unsigned int from_col_row_to_idx(
 	}
 }
 
-void de_zig_zag(u8int values[], unsigned int side) {
+void ude_zig_zag(uint8_t values[], unsigned int side) {
 	unsigned int col, row;
 	for (row = 0 ; row < side ; row++) {
 		for (col = 0 ; col < side ; col++) {
-			printf(" %02d",
+			printf(" % "PRIu8,
+				values[from_col_row_to_idx(row, col, side)]);
+		}
+		printf("\n");
+	}
+}
+
+void de_zig_zag(int16_t values[], unsigned int side) {
+	unsigned int col, row;
+	for (row = 0 ; row < side ; row++) {
+		for (col = 0 ; col < side ; col++) {
+			printf(" % "PRId16,
 				values[from_col_row_to_idx(row, col, side)]);
 		}
 		printf("\n");

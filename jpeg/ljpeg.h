@@ -85,6 +85,9 @@ struct start_of_scan {
 	u8int* data;
 };
 
+void create_zig_zag(unsigned int side);
+void de_zig_zag(int16_t values[], unsigned int side);
+void ude_zig_zag(uint8_t values[], unsigned int side);
 huffman_t* huffman_from_jpeg_header(struct ljpeg_huffman_table*);
 
 void JFIF_header_print_info(void);
