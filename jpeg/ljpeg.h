@@ -19,9 +19,6 @@
 
 #include<huffman/huffman.h>
 
-typedef unsigned char  u8int;
-typedef unsigned short u16int;
-
 #define one_more_byte(c,f,idx) \
 	do{\
 		c = fgetc(f);\
@@ -30,34 +27,34 @@ typedef unsigned short u16int;
 
 struct JFIF_header {
 	char identifier[4];
-	u16int version;
-	u8int units;
-	u16int xdensity __attribute__ ((__packed__));
-	u16int ydensity __attribute__ ((__packed__));
-	u8int xthumb;
-	u8int ythumb;
-	u8int RGB[][3];
+	uint16_t version;
+	uint8_t units;
+	uint16_t xdensity __attribute__ ((__packed__));
+	uint16_t ydensity __attribute__ ((__packed__));
+	uint8_t xthumb;
+	uint8_t ythumb;
+	uint8_t RGB[][3];
 };
 
 struct Nf_array {
-	u8int id;                 /* Component identifier */
-	u8int hv_sampling_factor; /* Horizontal-Vertical sampling factor */
-	u8int quant_table_number; 
+	uint8_t id;                 /* Component identifier */
+	uint8_t hv_sampling_factor; /* Horizontal-Vertical sampling factor */
+	uint8_t quant_table_number; 
 };
 
 struct start_of_frame{
-	u8int sample; /* Sample precision */
-	u16int Y;     /* Number of lines */
-	u16int X;     /* Number of samples per line */
-	u8int Nf;     /* Number of image components in frame */
+	uint8_t sample; /* Sample precision */
+	uint16_t Y;     /* Number of lines */
+	uint16_t X;     /* Number of samples per line */
+	uint8_t Nf;     /* Number of image components in frame */
 	struct Nf_array nf_array[];
 }__attribute__ ((__packed__));
 
 struct quantization {
-	u8int precision:4;
-	u8int index:4;
-	u8int value[64];
-};
+	uint8_t precision:4;
+	uint8_t index:4;
+	uint8_t value[64];
+}__attribute__ ((__packed__));
 
 struct quantization_table {
 	struct quantization quantization[1];
@@ -69,20 +66,20 @@ struct quantization_table {
  * pointer to it.
  */
 struct ljpeg_huffman_table {/* maybe change the prefix in ljpeg_ */
-	u8int identifier:4;   /* high bit */
-	u8int matrix_type:4;  /* low bit  */
-	u8int ncodes[16];
+	uint8_t identifier:4;   /* high bit */
+	uint8_t matrix_type:4;  /* low bit  */
+	uint8_t ncodes[16];
 	/* this MUST be defined like that otherwise the compiler creates
 	 * a pointer and when passed to another function the values
 	 * are screwed up */
-	u8int values[1];/* symbols */
+	uint8_t values[1];/* symbols */
 };
 
 struct start_of_scan {
-	u16int length;
-	u8int ncomponents;
-	u16int* components __attribute__ ((__packed__));
-	u8int* data;
+	uint16_t length;
+	uint8_t ncomponents;
+	uint16_t* components __attribute__ ((__packed__));
+	uint8_t* data;
 };
 
 void create_zig_zag(unsigned int side);

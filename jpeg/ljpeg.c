@@ -150,8 +150,8 @@ static inline int fread_check(void* buffer, size_t size, FILE* stream) {
 	return 0;/* FIXME*/
 }
 
-static u16int get_section_length(FILE* f) {
-	u16int length;
+static uint16_t get_section_length(FILE* f) {
+	uint16_t length;
 	fread_check(&length, sizeof(length), f);
 
 	return ntohs(length);
@@ -160,8 +160,8 @@ static u16int get_section_length(FILE* f) {
 /* allocate and full a buffer with a section content */
 /* you can cast this to a section struct */
 void* section_to_buffer(FILE* f) {
-	u16int length = get_section_length(f);
-	u8int* buffer = malloc(length);
+	uint16_t length = get_section_length(f);
+	uint8_t* buffer = malloc(length);
 
 	fread_check(buffer, length - 2, f);
 
@@ -202,8 +202,8 @@ void JFIF_header_print_info(void) {
 	if (gJFIF_header->identifier[0] != 'J')
 		fprintf(stderr, " warning: no JPEG\n");
 
-	u8int major = htons(gJFIF_header->version) >> 8;
-	u8int minor = htons(gJFIF_header->version) & 0xff;
+	uint8_t major = htons(gJFIF_header->version) >> 8;
+	uint8_t minor = htons(gJFIF_header->version) & 0xff;
 	printf(" version: %d.%d\n", major, minor);
 
 	char* units [] = {
@@ -297,14 +297,14 @@ void ljpeg_print_huffman_tables(void) {
 struct start_of_scan g_start_of_scan;
 
 void ljpeg_read_scan_data(FILE* f) {
-	fread(&g_start_of_scan.length, sizeof(u16int), 1, f);
+	fread(&g_start_of_scan.length, sizeof(uint16_t), 1, f);
 	g_start_of_scan.length = htons(g_start_of_scan.length);
-	fread(&g_start_of_scan.ncomponents, sizeof(u8int), 1, f);
+	fread(&g_start_of_scan.ncomponents, sizeof(uint8_t), 1, f);
 
 	g_start_of_scan.components =
-		malloc(sizeof(u16int)*g_start_of_scan.ncomponents);
+		malloc(sizeof(uint16_t)*g_start_of_scan.ncomponents);
 	fread(g_start_of_scan.components,
-		sizeof(u16int), g_start_of_scan.ncomponents, f);
+		sizeof(uint16_t), g_start_of_scan.ncomponents, f);
 
 	/* 3 useless bytes */
 	fseek(f, 3, SEEK_CUR);/* 00 3F 00 ?*/
