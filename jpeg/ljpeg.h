@@ -96,6 +96,11 @@ void quantization_table_print_info(void);
 void start_of_frame_print_info(void);
 void read_start_of_frame(FILE* f);
 
+extern huffman_t* g_huffman_y_dc;
+extern huffman_t* g_huffman_y_ac;
+extern huffman_t* g_huffman_cbcr_dc;
+extern huffman_t* g_huffman_cbcr_ac;
+
 void read_huffman_table(FILE* f);
 void ljpeg_print_huffman_tables(void);
 

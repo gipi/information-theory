@@ -291,9 +291,13 @@ void read_huffman_table(FILE* f) {
 }
 
 void ljpeg_print_huffman_tables(void) {
+	printf("Y DC\n");
 	huffman_print(g_huffman_y_dc);
+	printf("Y AC\n");
 	huffman_print(g_huffman_y_ac);
+	printf("CbCr DC\n");
 	huffman_print(g_huffman_cbcr_dc);
+	printf("CbCr AC\n");
 	huffman_print(g_huffman_cbcr_ac);
 }
 
