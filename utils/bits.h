@@ -2,7 +2,7 @@
 #define __BITS__
 #include<inttypes.h>
 
-#define NTH(b, n) ((b) & (1 << n) ? 1 : 0)
+#define NTH(b, n) ((b) & (1 << (n)) ? 1 : 0)
 #define BITIFY(a,n) ((a) ? (1 << (n)): 0)
 #define BITS(a,b,c,d,e,f,g,h) ( BITIFY(a, 7) | \
 	BITIFY(b,6) | \
