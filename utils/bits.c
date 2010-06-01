@@ -49,6 +49,19 @@ inline uint64_t create_mask_from_msb(
 	return mask;
 }
 
+/* create a mask with the initial bits all zero starting from MSB */
+/* create_complementary_mask(8) =
+ * 	1111111111111111111111111111111111111111111111111111111100000000 */
+inline uint64_t create_complementary_mask(uint8_t size) {
+	uint64_t mask = 0;
+	unsigned int cycle;
+	for (cycle = 0 ; cycle < size; cycle++){
+		mask |= (1 << (size - cycle - 1));
+	}
+
+	return ~mask;
+}
+
 /*
  * Write bits of size 'length' in 'buffer'.
  *
