@@ -471,3 +471,30 @@ void ljpeg_print_scan_data(void) {
 		free(matrix);
 	}
 }
+
+#ifdef __TEST__
+/*
+ * $ for i in $(seq 0 31); do ./test-category-code $i 5;done
+ */
+int main(int argc, char* argv[]) {
+	if (argc < 3) {
+		printf("usage: %s <category code> <size>\n", argv[0]);
+		exit(0);
+	}
+
+	int16_t cc = atoi(argv[1]);
+	uint16_t size = atoi(argv[2]);
+
+	if ( cc > (1 << size)) {
+		fprintf(stderr, "fatal: too big\n");
+		exit(1);
+	}
+
+	int16_t value = value_from_category_code(cc, size);
+
+	printf_byte(cc);
+	printf(" %d = %d\n", size, value);
+	return 0;
+}
+
+#endif /* __TEST__ */
