@@ -32,7 +32,8 @@
 	"  -h\tprint this message\n" \
 	"  -q\tquantization table\n" \
 	"  -H\thuffman tables\n"     \
-	"  -s\tscan data\n"
+	"  -s\tscan data\n"          \
+	"  -a\tprint all the above\n"
 
 static void usage(int exit_code) {
 	printf(USAGE_STR);
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]){
 	int show_huffman_table = 0;
 	int show_data = 0;
 
-	while ( (C = getopt(argc, argv, "hqHs")) != -1) {
+	while ( (C = getopt(argc, argv, "ahqHs")) != -1) {
 		switch (C) {
 			case 'h':
 				usage(0);
@@ -108,6 +109,12 @@ int main(int argc, char* argv[]){
 				break;
 			case 's':
 				show_data = 1;
+				break;
+			case 'a':
+				show_data = 1;
+				show_quantization_table = 1;
+				show_huffman_table = 1;
+				break;
 		}
 	}
 
@@ -141,6 +148,16 @@ int main(int argc, char* argv[]){
 
 	fclose(fjpeg);
 
+	if (show_quantization_table)
+		quantization_table_print_info();
+
+	if (show_huffman_table)
+		ljpeg_print_huffman_tables();
+
+	if (show_data)
+		ljpeg_print_scan_data();
+
+	ljpeg_free();
+
 	return 0;
 }
-
