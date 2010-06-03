@@ -219,6 +219,9 @@ huffman_t* Huffman_build_canonicalize_representation(void) {
 
 	hrows[HuffmanLength + 1].code_size = 0;
 
+	free(Huffman);
+	Huffman = NULL;
+
 	/* TODO: add last element with code_size = 0 */
 
 	return hrows;
