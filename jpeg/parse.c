@@ -30,9 +30,11 @@
 	"options:\n" \
 	"\n" \
 	"  -h\tprint this message\n" \
+	"  -f\tprint frame info\n" \
 	"  -q\tquantization table\n" \
 	"  -H\thuffman tables\n"     \
-	"  -s\tscan data\n"          \
+	"  -S\tbits representation of scan data\n" \
+	"  -S\tdump of blocks\n"          \
 	"  -a\tprint all the above\n"
 
 static void usage(int exit_code) {
@@ -94,9 +96,11 @@ int main(int argc, char* argv[]){
 	char C;
 	int show_quantization_table = 0;
 	int show_huffman_table = 0;
+	int show_block = 0;
 	int show_data = 0;
+	int show_frame = 0;
 
-	while ( (C = getopt(argc, argv, "ahqHs")) != -1) {
+	while ( (C = getopt(argc, argv, "ahqHsSf")) != -1) {
 		switch (C) {
 			case 'h':
 				usage(0);
@@ -108,12 +112,20 @@ int main(int argc, char* argv[]){
 				show_quantization_table = 1;
 				break;
 			case 's':
+				show_block = 1;
+				break;
+			case 'S':
 				show_data = 1;
 				break;
+			case 'f':
+				show_frame = 1;
+				break;
 			case 'a':
+				show_frame = 1;
 				show_data = 1;
 				show_quantization_table = 1;
 				show_huffman_table = 1;
+				show_block = 1;
 				break;
 		}
 	}
@@ -148,6 +160,9 @@ int main(int argc, char* argv[]){
 
 	fclose(fjpeg);
 
+	if (show_frame)
+		start_of_frame_print_info();
+
 	if (show_quantization_table)
 		quantization_table_print_info();
 
@@ -155,6 +170,9 @@ int main(int argc, char* argv[]){
 		ljpeg_print_huffman_tables();
 
 	if (show_data)
+		ljpeg_print_bits_scan_data();
+
+	if (show_block)
 		ljpeg_print_scan_data();
 
 	ljpeg_free();
