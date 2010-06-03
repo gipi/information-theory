@@ -1,5 +1,5 @@
-#ifndef __LJPEG__
-#define __LJPEG__
+#ifndef __LJPEG_H__
+#define __LJPEG_H__
 /*
  * Copyright 2010 Gianluca Pacchiella <gianluca.pacchiella@ktln2.org>
  *
