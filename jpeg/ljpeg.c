@@ -389,6 +389,16 @@ void ljpeg_free(void) {
 
 	free(gquantization_table[0]);
 	free(gquantization_table[1]);
+
+	free(g_huffman[0][0]);
+	free(g_huffman[0][1]);
+	free(g_huffman[1][0]);
+	free(g_huffman[1][1]);
+
+	free(gJFIF_header);
+	free(gstart_of_frame);
+
+	free(zigzag);
 }
 
 static int16_t value_from_category_code(uint64_t cc, uint16_t size) {
