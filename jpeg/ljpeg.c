@@ -283,27 +283,13 @@ void start_of_frame_print_info(void) {
 }
 
 struct ljpeg_huffman_table* g_ljpeg_ht = NULL;
-huffman_t* g_huffman_y_dc = NULL;
-huffman_t* g_huffman_y_ac = NULL;
-huffman_t* g_huffman_cbcr_dc = NULL;
-huffman_t* g_huffman_cbcr_ac = NULL;
+
+/* DC/AC Y/CbCr*/
+huffman_t* g_huffman[2][2];
 
 static void ljpeg_parse_huffman_table(void) {
 	huffman_t* hm = huffman_from_jpeg_header(g_ljpeg_ht);
-
-	if (g_ljpeg_ht->matrix_type) { /* AC */
-		if (g_ljpeg_ht->identifier) {/* CbCr */
-			g_huffman_cbcr_ac = hm;
-		} else {/* Y */
-			g_huffman_y_ac = hm;
-		}
-	} else {/* DC */
-		if (g_ljpeg_ht->identifier) {/* CbCr */
-			g_huffman_cbcr_dc = hm;
-		} else {/* Y */
-			g_huffman_y_dc = hm;
-		}
-	}
+	g_huffman[g_ljpeg_ht->matrix_type][g_ljpeg_ht->identifier] = hm;
 }
 
 void read_huffman_table(FILE* f) {
@@ -315,13 +301,17 @@ void read_huffman_table(FILE* f) {
 
 void ljpeg_print_huffman_tables(void) {
 	printf("Y DC\n");
-	huffman_print(g_huffman_y_dc);
+	huffman_print(g_huffman[0][0]);
 	printf("Y AC\n");
-	huffman_print(g_huffman_y_ac);
+	huffman_print(g_huffman[1][0]);
+
+	if (gstart_of_frame->Nf < 3)
+		return;
+
 	printf("CbCr DC\n");
-	huffman_print(g_huffman_cbcr_dc);
+	huffman_print(g_huffman[0][1]);
 	printf("CbCr AC\n");
-	huffman_print(g_huffman_cbcr_ac);
+	huffman_print(g_huffman[1][1]);
 }
 
 struct quantization_table* gquantization_table[2];
