@@ -139,7 +139,7 @@ void de_zig_zag(int16_t values[], unsigned int side) {
 	unsigned int col, row;
 	for (row = 0 ; row < side ; row++) {
 		for (col = 0 ; col < side ; col++) {
-			printf(" % "PRId16,
+			printf(" % 4"PRId16,
 				values[from_col_row_to_idx(row, col, side)]);
 		}
 		printf("\n");
