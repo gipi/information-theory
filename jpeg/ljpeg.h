@@ -37,7 +37,8 @@ struct JFIF_header {
 
 struct Nf_array {
 	uint8_t id;                 /* Component identifier */
-	uint8_t hv_sampling_factor; /* Horizontal-Vertical sampling factor */
+	uint8_t hsampl:4; /* Horizontal-Vertical sampling factor */
+	uint8_t vsampl:4; /* Horizontal-Vertical sampling factor */
 	uint8_t quant_table_number; 
 };
 

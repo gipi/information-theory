@@ -218,14 +218,47 @@ void JFIF_header_print_info(void) {
 }
 
 struct start_of_frame* gstart_of_frame = NULL;
+/* save the sampling factor for each component */
+struct sampling_t{
+	uint8_t hor;
+	uint8_t ver;
+};
 
+struct sampling_t g_sampling[3];
+
+/* from component id and selection from horizontal and vertical
+ * returns the dimension of */
+static uint8_t _ljpeg_get_hor_sampling(uint8_t component_id) {
+	uint8_t max = 0, value;
+	unsigned int cmpidx;
+	for (cmpidx = 0 ; cmpidx < gstart_of_frame->Nf ; cmpidx++) {
+		value = gstart_of_frame->nf_array[cmpidx].hsampl;
+		max = value > max ? value : max;
+	}
+
+	return max/gstart_of_frame->nf_array[component_id].hsampl;
 }
 
+static uint8_t _ljpeg_get_ver_sampling(uint8_t component_id) {
+	uint8_t max, value;
+	unsigned int cmpidx;
+	for (cmpidx = 0 ; cmpidx < gstart_of_frame->Nf ; cmpidx++) {
+		value = gstart_of_frame->nf_array[cmpidx].vsampl;
+		max = value > max ? value : max;
+	}
+
+	return max/gstart_of_frame->nf_array[component_id].vsampl;
 }
 
 
 void read_start_of_frame(FILE* f) {
 	gstart_of_frame = section_to_buffer(f);
+
+	unsigned int cmpidx;
+	for (cmpidx = 0 ; cmpidx < gstart_of_frame->Nf ; cmpidx++) {
+		g_sampling[cmpidx].hor = _ljpeg_get_hor_sampling(cmpidx);
+		g_sampling[cmpidx].ver = _ljpeg_get_ver_sampling(cmpidx);
+	}
 }
 
 void start_of_frame_print_info(void) {
@@ -243,8 +276,8 @@ void start_of_frame_print_info(void) {
 			" HV sampling %hd:%hd\n"
 			" Quant. table id %u\n\n",
 				nfa.id,
-				nfa.hv_sampling_factor & 15,
-				nfa.hv_sampling_factor >> 4,
+				nfa.hsampl,
+				nfa.vsampl,
 				nfa.quant_table_number);
 	}
 }
