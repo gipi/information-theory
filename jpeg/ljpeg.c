@@ -107,18 +107,21 @@ void create_zig_zag(unsigned int side) {
 	create_second_half_zigzag(side, who);
 }
 
-static unsigned int from_col_row_to_idx(
+static int from_col_row_to_idx(
 	unsigned int row,
 	unsigned int col,
 	unsigned int side)
 {
 	unsigned int cycle;
+	/* TODO: add check for max < MAX_INT */
 	unsigned int max = side * (side + 1);
 	for (cycle = 0 ; cycle < max ; cycle++) {
 		struct point p = zigzag[cycle];
 		if (p.y == row && p.x == col)
 			return cycle;
 	}
+
+	return -1;
 }
 
 void ude_zig_zag(uint8_t values[], unsigned int side) {
