@@ -75,10 +75,16 @@ struct ljpeg_huffman_table {/* maybe change the prefix in ljpeg_ */
 	uint8_t values[1];/* symbols */
 };
 
+struct component {
+	uint8_t id;
+	uint8_t ac:4;
+	uint8_t dc:4;
+};
+
 struct start_of_scan {
 	uint16_t length;
 	uint8_t ncomponents;
-	uint16_t* components __attribute__ ((__packed__));
+	struct component* components __attribute__ ((__packed__));
 	uint8_t* data;
 };
 
@@ -106,6 +112,7 @@ void ljpeg_print_huffman_tables(void);
 
 void ljpeg_read_scan_data(FILE* f);
 void ljpeg_print_scan_data(void);
+void ljpeg_print_bits_scan_data(void);
 
 void ljpeg_free(void);
 

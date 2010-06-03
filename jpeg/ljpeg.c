@@ -462,11 +462,99 @@ static int16_t* _ljpeg_dump_block(xio_t* xio, huffman_t* htable_dc, huffman_t* h
 	return matrix;
 }
 
-void ljpeg_print_scan_data(void) {
+void ljpeg_print_bits_scan_data(void) {
+	printf("DUMP OF %d BYTES\n", g_scan_data_size);
+	fprintf(stdout, "Scan data of length %u\n", g_start_of_scan.length);
+	fprintf(stdout, " #components: %u\n", g_start_of_scan.ncomponents);
 	unsigned int cycle;
+	for (cycle = 0 ; cycle < g_start_of_scan.ncomponents ; cycle++) {
+		fprintf(stdout, "  id:%u huffman table AC: %u DC: %u\n",
+				/* FIXME: endianess problem NOT PORTABLE */
+				g_start_of_scan.components[cycle].id,
+				g_start_of_scan.components[cycle].ac,
+				g_start_of_scan.components[cycle].dc);
+	}
+
 	for (cycle = 0 ; cycle < g_scan_data_size ; cycle++) {
 		printf_byte(g_start_of_scan.data[cycle]);
 	}
+}
+
+/* Dumps one specific component of image according to its sampling */
+static unsigned int _ljpeg_dump_one_component(xio_t* xio, huffman_t* ht_dc,
+		huffman_t* ht_ac, uint8_t hor, uint8_t ver)
+{
+	unsigned int Total = 0;
+	unsigned int cyclex, cycley;
+	int16_t* matrix;
+	for (cyclex = 1 ; cyclex <= hor ; cyclex++) {
+		for (cycley = 1 ; cycley <= ver ; cycley++) {
+			matrix = _ljpeg_dump_block(xio, ht_dc, ht_ac);
+			if (!matrix) {/* TODO: more verbose output */
+				fflush(NULL);
+				fprintf(stderr, "fatal [%u/%u]\n",
+					cyclex, cycley);
+				break;
+			}
+
+			puts("");
+			de_zig_zag(matrix, 8);
+			free(matrix);
+
+			Total++;
+		}
+	}
+
+	return Total;
+}
+
+/*
+ * For example a subsampling of 2:2 1:1 1:1 has
+ * an encoding into the jpeg file as
+ *
+ * YDU YDU YDU YDU CbDU CrDU
+ *
+ * so if the image can be divided in N 8x8 blocks there
+ * are N blocks for Y components and N/4 for each of
+ * remaining components.
+ *
+ * REFERENCE http://www.w3.org/Graphics/JPEG/itu-t81.pdf PG26
+ *
+ * A.2.4 Completion of partial MCU 
+ */
+static int _ljpeg_get_n_blocks() {
+	unsigned int cmpidx;
+	int nblocks[3];
+	int n_total_blocks = 0;
+	int sampling;
+	int delta;
+
+	int nblocksx = (ntohs(gstart_of_frame->X)/8);
+	int nblocksy = (ntohs(gstart_of_frame->Y)/8);
+
+	/* TODO: is this the correct way to do this? */
+	/* the less sampled is the first component */
+	nblocks[0] = nblocksx*nblocksy;
+	sampling = gstart_of_frame->nf_array[0].hsampl*gstart_of_frame->nf_array[0].vsampl;
+	delta = nblocks[0] % sampling;
+	if (delta)
+		nblocks[0] += sampling - delta;
+
+	n_total_blocks = nblocks[0];
+
+	/* adjust the #blocks relatevely to the sampling */
+	for (cmpidx = 1 ; cmpidx < gstart_of_frame->Nf ; cmpidx++) {
+		nblocks[cmpidx] = nblocks[0];
+		sampling = g_sampling[cmpidx].hor*g_sampling[cmpidx].ver;
+		nblocks[cmpidx] /= sampling;
+
+		n_total_blocks += nblocks[cmpidx];
+	}
+
+	return n_total_blocks;
+}
+
+void ljpeg_print_scan_data(void) {
 	puts("");
 
 	/* first DC */
@@ -478,37 +566,30 @@ void ljpeg_print_scan_data(void) {
 
 	create_zig_zag(8);
 
-	int nblocks =
-		(ntohs(gstart_of_frame->Y)/8)*(ntohs(gstart_of_frame->X)/8);
+	unsigned int cmpidx;
 
-	printf("DUMPING OF %d block(s)\n", nblocks);
 
-	int16_t* matrix = NULL;
-	/* FIXME: works only for 1:1:1 subsampling */
-	while (nblocks--) {
-		matrix = _ljpeg_dump_block(&xio, g_huffman_y_dc, g_huffman_y_ac);
-		if (!matrix)/* TODO: more verbose output */
-			break;
+	int n_total_blocks = _ljpeg_get_n_blocks();
 
-		puts("");
-		de_zig_zag(matrix, 8);
-		free(matrix);
-
-		matrix = _ljpeg_dump_block(&xio, g_huffman_cbcr_dc, g_huffman_cbcr_ac);
-		if (!matrix)
-			break;
-
-		puts("");
-		de_zig_zag(matrix, 8);
-		free(matrix);
-
-		matrix = _ljpeg_dump_block(&xio, g_huffman_cbcr_dc, g_huffman_cbcr_ac);
-		if (!matrix)
-			break;
-
-		puts("");
-		de_zig_zag(matrix, 8);
-		free(matrix);
+	printf("DUMPING OF %d block(s)\n", n_total_blocks);
+	while (n_total_blocks) {
+		for (cmpidx = 0 ; cmpidx < gstart_of_frame->Nf ; cmpidx++) {
+			/* TODO: understand dc/ac/id */
+			uint8_t rid = g_start_of_scan.components[cmpidx].id;
+			uint8_t id = rid == 1 ? 0 : 1;
+#if 0
+			/* TODO: dc&ac what do? */
+			uint8_t dc = g_start_of_scan.components[cmpidx].dc;
+			uint8_t ac = g_start_of_scan.components[cmpidx].ac;
+#endif
+			printf("COMPONENT %d\n", rid);
+			n_total_blocks -= _ljpeg_dump_one_component(
+				&xio,
+				g_huffman[0][id],
+				g_huffman[1][id],
+				gstart_of_frame->nf_array[cmpidx].hsampl,
+				gstart_of_frame->nf_array[cmpidx].vsampl);
+		}
 	}
 }
 
