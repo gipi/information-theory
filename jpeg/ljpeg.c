@@ -349,7 +349,10 @@ void ljpeg_read_scan_data(FILE* f) {
 		sizeof(uint16_t), g_start_of_scan.ncomponents, f);
 
 	/* 3 useless bytes */
-	fseek(f, 3, SEEK_CUR);/* 00 3F 00 ?*/
+	if(fseek(f, 3, SEEK_CUR) < 0) {/* 00 3F 00 ?*/
+		fprintf(stderr, "fatal: stream has to be seekable\n");
+		return;
+	}
 
 	/* TODO: check for size */
 	g_start_of_scan.data = malloc(1024*1024);
@@ -440,8 +443,10 @@ static int16_t* _ljpeg_dump_block(xio_t* xio, huffman_t* htable_dc, huffman_t* h
 		/* AC stuffs */
 		status = huffman_look_for_code_from_xio(
 			&ac_code, htable_ac, xio);
-		if (status < 0)
+		if (status < 0) {
+			free(matrix);
 			return NULL;
+		}
 
 		zlc = (ac_code & 0xf0) >> 4;
 		category_bits = ac_code & 0x0f;
