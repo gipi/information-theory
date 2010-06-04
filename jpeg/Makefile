@@ -1,4 +1,4 @@
-CPPFLAGS=-I. -Wall -Wpacked -Wpadded -g
+CPPFLAGS=-I. -I.. -Wall -Wpacked -Wpadded -g
 
 HUFFMAN_LIBRARY_PATH = $(shell dirname $(CURDIR)/../huffman/.)
 HUFFMAN_LD_FLAGS = -L $(HUFFMAN_LIBRARY_PATH) \
