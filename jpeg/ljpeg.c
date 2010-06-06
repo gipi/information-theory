@@ -243,7 +243,7 @@ static uint8_t _ljpeg_get_hor_sampling(uint8_t component_id) {
 }
 
 static uint8_t _ljpeg_get_ver_sampling(uint8_t component_id) {
-	uint8_t max, value;
+	uint8_t max = 0, value;
 	unsigned int cmpidx;
 	for (cmpidx = 0 ; cmpidx < gstart_of_frame->Nf ; cmpidx++) {
 		value = gstart_of_frame->nf_array[cmpidx].vsampl;
