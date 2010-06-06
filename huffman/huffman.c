@@ -219,9 +219,6 @@ huffman_t* Huffman_build_canonicalize_representation(void) {
 
 	hrows[HuffmanLength + 1].code_size = 0;
 
-	free(Huffman);
-	Huffman = NULL;
-
 	/* TODO: add last element with code_size = 0 */
 
 	return hrows;
@@ -407,4 +404,9 @@ int huffman_look_for_code_from_xio(uint8_t* symbol, huffman_t* t, xio_t* xio) {
 
 
 	return -1;
+}
+
+void Huffman_free(void) {
+	free(Huffman);
+	Huffman = NULL;
 }

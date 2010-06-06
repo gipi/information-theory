@@ -192,7 +192,11 @@ huffman_t* huffman_from_jpeg_header(struct ljpeg_huffman_table* t) {
 
 	Huffman_set(hc, ncodes);
 
-	return Huffman_build_canonicalize_representation();
+	huffman_t* table = Huffman_build_canonicalize_representation();
+
+	Huffman_free();
+
+	return table;
 }
 
 struct JFIF_header* gJFIF_header = NULL;

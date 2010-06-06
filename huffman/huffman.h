@@ -46,6 +46,7 @@ uint64_t huffman_canonicalize_step(
 	uint64_t previous_code, uint8_t previous_size, uint8_t new_size);
 
 void Huffman_set(huffman_canon_t* huffman_array, uint8_t length);
+void Huffman_free(void);
 
 int huffman_look_for_code_from_xio(uint8_t* symbol, huffman_t* t, xio_t* xio);
 
