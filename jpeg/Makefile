@@ -15,7 +15,7 @@ test_zig_zag parse: LDFLAGS += $(HUFFMAN_LD_FLAGS)
 test_zig_zag parse: ljpeg.o
 parse: parse.o
 
-test-category-code: ljpeg.c ../utils/bits.o
+test-category-code: ljpeg.c
 	$(CC) $(CPPFLAGS) -D__TEST__ $^ -o $@ $(LDFLAGS) $(HUFFMAN_LD_FLAGS)
 
 parse.o test_zig_zag.o: ljpeg.h
