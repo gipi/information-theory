@@ -1,8 +1,6 @@
 DIRS = data_structure utils huffman jpeg
 VPATH = $(DIRS)
 
-include default.mk
-
 CPPFLAGS = -I. -Wall -g
 
 SRC=$(wildcard *.c *.h)
