@@ -18,11 +18,15 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
-#include<arpa/inet.h>
 #include<errno.h>
 
 #include<jpeg/ljpeg.h>
 #include<utils/bits.h>
+
+#include"config.h"
+#ifdef WIN32
+#include<windows.h>
+#endif
 
 #define USAGE_STR \
 	"usage: parse [options] <jpeg file>\n" \
@@ -133,7 +137,7 @@ int main(int argc, char* argv[]){
 	FILE* fjpeg = stdin;
 	if (optind < argc) {
 		char* filename = argv[optind];
-		fjpeg = fopen(argv[optind], "r");
+		fjpeg = fopen(argv[optind], "rb");
 		if (!fjpeg) {
 			fprintf(stderr, "fatal opening '%s': %s\n", filename, strerror(errno));
 			usage(1);

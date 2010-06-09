@@ -1,0 +1,6 @@
+
+  $ autoreconf -vfi
+  $ ./configure
+  $ make
+
+for now there is not need to install.
