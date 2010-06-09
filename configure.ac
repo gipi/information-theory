@@ -12,11 +12,12 @@ AC_PROG_CC
 AC_PROG_RANLIB
 
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lhuffman':
-AC_CHECK_LIB([huffman], [main])
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h inttypes.h stddef.h stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([windows.h], [is_win32=yes])
+# define a IS_WIN32 variable to use with Makefile.am
+AM_CONDITIONAL([IS_WIN32], [test "$is_win32" = yes])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
