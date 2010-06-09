@@ -17,6 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef HAVE_CONFIG_H
+#include"config.h"
+#endif
+
+#ifdef HAVE_ARPA_INET_H /* ntohs */
+#include<arpa/inet.h>
+#elif HAVE_WINSOCK2_H
+#include<winsock2.h>
+#endif
+
+#ifdef WIN32
+#include<windows.h>
+#endif
+
 #include<huffman/huffman.h>
 
 #define one_more_byte(c,f) \

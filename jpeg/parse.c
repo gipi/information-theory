@@ -18,11 +18,15 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
-#include<arpa/inet.h>
 #include<errno.h>
 
 #include<jpeg/ljpeg.h>
 #include<utils/bits.h>
+
+#include"config.h"
+#ifdef WIN32
+#include<windows.h>
+#endif
 
 #define USAGE_STR \
 	"usage: parse [options] <jpeg file>\n" \
