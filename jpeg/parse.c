@@ -137,7 +137,7 @@ int main(int argc, char* argv[]){
 	FILE* fjpeg = stdin;
 	if (optind < argc) {
 		char* filename = argv[optind];
-		fjpeg = fopen(argv[optind], "r");
+		fjpeg = fopen(argv[optind], "rb");
 		if (!fjpeg) {
 			fprintf(stderr, "fatal opening '%s': %s\n", filename, strerror(errno));
 			usage(1);
