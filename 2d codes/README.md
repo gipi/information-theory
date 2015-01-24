@@ -1,0 +1,3 @@
+ - Howto to decode Aztec code [video](https://www.youtube.com/watch?v=xtlqYx6e1TE)
+ - http://en.wikipedia.org/wiki/Aztec_Code
+ - https://github.com/bharathp666/opencv_qr
